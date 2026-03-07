@@ -1,0 +1,2513 @@
+export interface BeanComponent {
+  beanId: string;
+  percentage: number;
+}
+
+export interface CustomBlend {
+  id: string;
+  name: 'Custom Blend';
+  components: BeanComponent[];
+}
+
+export interface CoffeeRecipe {
+  id: string;
+  name: string;
+  beanBlend?: string; // ID of preset or custom blend
+  customBlend?: CustomBlend; // Custom bean blend
+  roast: string;
+  drinkType: string;
+  espressoShots?: number;
+  milk?: string;
+  milkAmount?: string;
+  sweetener?: string;
+  sweetenerAmount?: string;
+  flavorSyrup?: string;
+  syrupAmount?: string;
+  toppings?: string[]; // Array of topping IDs
+  description?: string;
+}
+
+export interface NutritionalInfo {
+  calories: number;
+  caffeine: number; // mg
+  sugar: number; // g
+  protein: number; // g
+  fat: number; // g
+}
+
+// Bean types with nutritional info (per shot of espresso ~18g ground coffee)
+export const baseBeans = [
+  // TYPICA FAMILY
+  {
+    id: 'typica',
+    name: 'Typica',
+    family: 'Typica Family',
+    profile: 'clean, sweet, balanced',
+    caffeinePerShot: 73,
+  },
+  {
+    id: 'blue-mountain',
+    name: 'Blue Mountain',
+    family: 'Typica Family',
+    profile: 'mild, smooth, chocolate',
+    caffeinePerShot: 65,
+  },
+  {
+    id: 'kona',
+    name: 'Kona',
+    family: 'Typica Family',
+    profile: 'nutty, caramel',
+    caffeinePerShot: 67,
+  },
+  {
+    id: 'maragogipe',
+    name: 'Maragogipe',
+    family: 'Typica Family',
+    profile: 'mild, floral, tea-like',
+    caffeinePerShot: 68,
+  },
+  {
+    id: 'san-ramon',
+    name: 'San Ramon',
+    family: 'Typica Family',
+    profile: 'soft, chocolate',
+    caffeinePerShot: 70,
+  },
+  {
+    id: 'sumatra-typica',
+    name: 'Sumatra Typica',
+    family: 'Typica Family',
+    profile: 'earthy, herbal',
+    caffeinePerShot: 80,
+  },
+  {
+    id: 'kent',
+    name: 'Kent',
+    family: 'Typica Family',
+    profile: 'balanced, citrus',
+    caffeinePerShot: 72,
+  },
+  {
+    id: 'java',
+    name: 'Java',
+    family: 'Typica Family',
+    profile: 'herbal, chocolate',
+    caffeinePerShot: 79,
+  },
+  {
+    id: 'bergendal',
+    name: 'Bergendal',
+    family: 'Typica Family',
+    profile: 'bright acidity, fruit',
+    caffeinePerShot: 74,
+  },
+  {
+    id: 'pluma-hidalgo',
+    name: 'Pluma Hidalgo',
+    family: 'Typica Family',
+    profile: 'chocolate, floral',
+    caffeinePerShot: 71,
+  },
+
+  // BOURBON FAMILY
+  {
+    id: 'bourbon',
+    name: 'Bourbon',
+    family: 'Bourbon Family',
+    profile: 'sweet, caramel, chocolate',
+    caffeinePerShot: 74,
+  },
+  {
+    id: 'red-bourbon',
+    name: 'Red Bourbon',
+    family: 'Bourbon Family',
+    profile: 'fruity, balanced',
+    caffeinePerShot: 75,
+  },
+  {
+    id: 'yellow-bourbon',
+    name: 'Yellow Bourbon',
+    family: 'Bourbon Family',
+    profile: 'honey, citrus',
+    caffeinePerShot: 73,
+  },
+  {
+    id: 'orange-bourbon',
+    name: 'Orange Bourbon',
+    family: 'Bourbon Family',
+    profile: 'bright fruit',
+    caffeinePerShot: 74,
+  },
+  {
+    id: 'pink-bourbon',
+    name: 'Pink Bourbon',
+    family: 'Bourbon Family',
+    profile: 'floral, berry',
+    caffeinePerShot: 76,
+  },
+  {
+    id: 'sl28',
+    name: 'SL28',
+    family: 'Bourbon Family',
+    profile: 'blackcurrant, wine-like',
+    caffeinePerShot: 78,
+  },
+  {
+    id: 'sl34',
+    name: 'SL34',
+    family: 'Bourbon Family',
+    profile: 'citrus, berry',
+    caffeinePerShot: 77,
+  },
+  {
+    id: 'pacas',
+    name: 'Pacas',
+    family: 'Bourbon Family',
+    profile: 'chocolate, mild',
+    caffeinePerShot: 72,
+  },
+  {
+    id: 'pacamara',
+    name: 'Pacamara',
+    family: 'Bourbon Family',
+    profile: 'tropical fruit, complex',
+    caffeinePerShot: 75,
+  },
+  {
+    id: 'villa-sarchi',
+    name: 'Villa Sarchi',
+    family: 'Bourbon Family',
+    profile: 'bright citrus',
+    caffeinePerShot: 76,
+  },
+  {
+    id: 'tekisic',
+    name: 'Tekisic',
+    family: 'Bourbon Family',
+    profile: 'sweet, chocolate',
+    caffeinePerShot: 73,
+  },
+
+  // ETHIOPIAN HEIRLOOM / LANDRACE
+  {
+    id: 'heirloom-ethiopian',
+    name: 'Heirloom Ethiopian',
+    family: 'Ethiopian Heirloom',
+    profile: 'floral, jasmine',
+    caffeinePerShot: 85,
+  },
+  {
+    id: 'gesha',
+    name: 'Gesha/Geisha',
+    family: 'Ethiopian Heirloom',
+    profile: 'jasmine, bergamot, tea',
+    caffeinePerShot: 70,
+  },
+  {
+    id: 'kurume',
+    name: 'Kurume',
+    family: 'Ethiopian Heirloom',
+    profile: 'berry, citrus',
+    caffeinePerShot: 83,
+  },
+  {
+    id: 'dega',
+    name: 'Dega',
+    family: 'Ethiopian Heirloom',
+    profile: 'floral fruit',
+    caffeinePerShot: 84,
+  },
+  {
+    id: 'wolisho',
+    name: 'Wolisho',
+    family: 'Ethiopian Heirloom',
+    profile: 'sweet fruit',
+    caffeinePerShot: 82,
+  },
+  {
+    id: 'ethiopian-74110',
+    name: 'Ethiopian 74110',
+    family: 'Ethiopian Heirloom',
+    profile: 'peach, citrus',
+    caffeinePerShot: 81,
+  },
+  {
+    id: 'ethiopian-74112',
+    name: 'Ethiopian 74112',
+    family: 'Ethiopian Heirloom',
+    profile: 'floral fruit',
+    caffeinePerShot: 82,
+  },
+  {
+    id: 'rume-sudan',
+    name: 'Rume Sudan',
+    family: 'Ethiopian Heirloom',
+    profile: 'tropical fruit',
+    caffeinePerShot: 79,
+  },
+
+  // CATURRA / CATUAÍ FAMILY
+  {
+    id: 'caturra',
+    name: 'Caturra',
+    family: 'Caturra/Catuaí Family',
+    profile: 'bright citrus',
+    caffeinePerShot: 76,
+  },
+  {
+    id: 'red-catuai',
+    name: 'Red Catuaí',
+    family: 'Caturra/Catuaí Family',
+    profile: 'balanced, sweet',
+    caffeinePerShot: 74,
+  },
+  {
+    id: 'yellow-catuai',
+    name: 'Yellow Catuaí',
+    family: 'Caturra/Catuaí Family',
+    profile: 'honey sweetness',
+    caffeinePerShot: 73,
+  },
+  {
+    id: 'catuai-44',
+    name: 'Catuaí 44',
+    family: 'Caturra/Catuaí Family',
+    profile: 'mild chocolate',
+    caffeinePerShot: 72,
+  },
+  {
+    id: 'catucai',
+    name: 'Catucaí',
+    family: 'Caturra/Catuaí Family',
+    profile: 'nutty, smooth',
+    caffeinePerShot: 71,
+  },
+  {
+    id: 'catucai-785',
+    name: 'Catucaí 785',
+    family: 'Caturra/Catuaí Family',
+    profile: 'caramel',
+    caffeinePerShot: 72,
+  },
+  {
+    id: 'catucai-2sl',
+    name: 'Catucaí 2SL',
+    family: 'Caturra/Catuaí Family',
+    profile: 'balanced fruit',
+    caffeinePerShot: 75,
+  },
+
+  // HYBRID / DISEASE RESISTANT
+  {
+    id: 'castillo',
+    name: 'Castillo',
+    family: 'Hybrid/Disease Resistant',
+    profile: 'mild fruit, chocolate',
+    caffeinePerShot: 73,
+  },
+  {
+    id: 'colombia',
+    name: 'Colombia',
+    family: 'Hybrid/Disease Resistant',
+    profile: 'balanced, caramel',
+    caffeinePerShot: 75,
+  },
+  {
+    id: 'tabi',
+    name: 'Tabi',
+    family: 'Hybrid/Disease Resistant',
+    profile: 'sweet, citrus',
+    caffeinePerShot: 74,
+  },
+  {
+    id: 'marsellesa',
+    name: 'Marsellesa',
+    family: 'Hybrid/Disease Resistant',
+    profile: 'chocolate',
+    caffeinePerShot: 72,
+  },
+  {
+    id: 'parainema',
+    name: 'Parainema',
+    family: 'Hybrid/Disease Resistant',
+    profile: 'bright fruit',
+    caffeinePerShot: 76,
+  },
+  {
+    id: 'obata',
+    name: 'Obata',
+    family: 'Hybrid/Disease Resistant',
+    profile: 'smooth nutty',
+    caffeinePerShot: 70,
+  },
+  {
+    id: 'acaua',
+    name: 'Acauã',
+    family: 'Hybrid/Disease Resistant',
+    profile: 'chocolate, nut',
+    caffeinePerShot: 71,
+  },
+  {
+    id: 'arara',
+    name: 'Arara',
+    family: 'Hybrid/Disease Resistant',
+    profile: 'sweet citrus',
+    caffeinePerShot: 74,
+  },
+  {
+    id: 'centroamericano',
+    name: 'Centroamericano',
+    family: 'Hybrid/Disease Resistant',
+    profile: 'complex fruit',
+    caffeinePerShot: 77,
+  },
+
+  // ROBUSTA VARIETIES
+  {
+    id: 'robusta',
+    name: 'Robusta',
+    family: 'Robusta (Canephora)',
+    profile: 'strong, bitter',
+    caffeinePerShot: 140,
+  },
+  {
+    id: 'nganda',
+    name: 'Nganda',
+    family: 'Robusta (Canephora)',
+    profile: 'earthy',
+    caffeinePerShot: 135,
+  },
+  {
+    id: 'erecta',
+    name: 'Erecta',
+    family: 'Robusta (Canephora)',
+    profile: 'woody',
+    caffeinePerShot: 138,
+  },
+  {
+    id: 'kouillou',
+    name: 'Kouillou',
+    family: 'Robusta (Canephora)',
+    profile: 'harsh, nutty',
+    caffeinePerShot: 142,
+  },
+
+  // RARE SPECIES
+  {
+    id: 'liberica',
+    name: 'Liberica',
+    family: 'Rare Species',
+    profile: 'smoky, woody',
+    caffeinePerShot: 90,
+  },
+  {
+    id: 'excelsa',
+    name: 'Excelsa',
+    family: 'Rare Species',
+    profile: 'tart, fruity',
+    caffeinePerShot: 88,
+  },
+  {
+    id: 'stenophylla',
+    name: 'Stenophylla',
+    family: 'Rare Species',
+    profile: 'sweet peach',
+    caffeinePerShot: 65,
+  },
+  {
+    id: 'racemosa',
+    name: 'Racemosa',
+    family: 'Rare Species',
+    profile: 'floral fruity',
+    caffeinePerShot: 60,
+  },
+
+  // EVERYDAY BRANDS
+  {
+    id: 'folgers',
+    name: 'Folgers',
+    family: 'Everyday Brands',
+    profile: 'smooth, mild, classic',
+    caffeinePerShot: 70,
+  },
+  {
+    id: 'maxwell-house',
+    name: 'Maxwell House',
+    family: 'Everyday Brands',
+    profile: 'balanced, traditional',
+    caffeinePerShot: 72,
+  },
+  {
+    id: 'chock-full-o-nuts',
+    name: 'Chock Full o\' Nuts',
+    family: 'Everyday Brands',
+    profile: 'nutty, medium roast',
+    caffeinePerShot: 75,
+  },
+  {
+    id: 'eight-o-clock',
+    name: 'Eight O\'Clock Coffee',
+    family: 'Everyday Brands',
+    profile: 'smooth, medium',
+    caffeinePerShot: 73,
+  },
+  {
+    id: 'community-coffee',
+    name: 'Community Coffee',
+    family: 'Everyday Brands',
+    profile: 'rich, chocolate',
+    caffeinePerShot: 77,
+  },
+  {
+    id: 'dunkin',
+    name: 'Dunkin\'',
+    family: 'Everyday Brands',
+    profile: 'mild, smooth',
+    caffeinePerShot: 71,
+  },
+  {
+    id: 'peets',
+    name: 'Peet\'s Coffee',
+    family: 'Everyday Brands',
+    profile: 'strong, dark roast',
+    caffeinePerShot: 80,
+  },
+  {
+    id: 'yuban',
+    name: 'Yuban',
+    family: 'Everyday Brands',
+    profile: 'rich, full-bodied',
+    caffeinePerShot: 74,
+  },
+  {
+    id: 'hills-bros',
+    name: 'Hills Bros',
+    family: 'Everyday Brands',
+    profile: 'classic American',
+    caffeinePerShot: 71,
+  },
+  {
+    id: 'mccafe-premium',
+    name: 'McCafé Premium Roast',
+    family: 'Everyday Brands',
+    profile: 'medium roast',
+    caffeinePerShot: 70,
+  },
+  {
+    id: 'great-value',
+    name: 'Great Value (Walmart)',
+    family: 'Everyday Brands',
+    profile: 'value blend',
+    caffeinePerShot: 68,
+  },
+  {
+    id: 'kroger',
+    name: 'Kroger Brand Coffee',
+    family: 'Everyday Brands',
+    profile: 'store brand medium',
+    caffeinePerShot: 69,
+  },
+
+  // ESPRESSO & LATIN BRANDS
+  {
+    id: 'cafe-bustelo',
+    name: 'Café Bustelo',
+    family: 'Espresso & Latin',
+    profile: 'strong, bold espresso',
+    caffeinePerShot: 85,
+  },
+  {
+    id: 'cafe-pilon',
+    name: 'Café Pilon',
+    family: 'Espresso & Latin',
+    profile: 'dark Cuban style',
+    caffeinePerShot: 83,
+  },
+  {
+    id: 'la-llave',
+    name: 'La Llave',
+    family: 'Espresso & Latin',
+    profile: 'strong Cuban espresso',
+    caffeinePerShot: 84,
+  },
+  {
+    id: 'lavazza',
+    name: 'Lavazza',
+    family: 'Espresso & Latin',
+    profile: 'Italian espresso chocolate',
+    caffeinePerShot: 80,
+  },
+  {
+    id: 'illy',
+    name: 'Illy',
+    family: 'Espresso & Latin',
+    profile: 'smooth Italian espresso',
+    caffeinePerShot: 78,
+  },
+  {
+    id: 'segafredo',
+    name: 'Segafredo Zanetti',
+    family: 'Espresso & Latin',
+    profile: 'classic Italian espresso',
+    caffeinePerShot: 79,
+  },
+  {
+    id: 'kimbo',
+    name: 'Kimbo',
+    family: 'Espresso & Latin',
+    profile: 'bold Neapolitan espresso',
+    caffeinePerShot: 82,
+  },
+
+  // SPECIALTY/THIRD-WAVE BRANDS
+  {
+    id: 'stumptown',
+    name: 'Stumptown Coffee Roasters',
+    family: 'Specialty/Third-Wave',
+    profile: 'fruity, complex',
+    caffeinePerShot: 75,
+  },
+  {
+    id: 'blue-bottle',
+    name: 'Blue Bottle Coffee',
+    family: 'Specialty/Third-Wave',
+    profile: 'clean, bright',
+    caffeinePerShot: 74,
+  },
+  {
+    id: 'intelligentsia',
+    name: 'Intelligentsia Coffee',
+    family: 'Specialty/Third-Wave',
+    profile: 'complex, balanced',
+    caffeinePerShot: 76,
+  },
+  {
+    id: 'counter-culture',
+    name: 'Counter Culture Coffee',
+    family: 'Specialty/Third-Wave',
+    profile: 'bright specialty',
+    caffeinePerShot: 77,
+  },
+  {
+    id: 'onyx',
+    name: 'Onyx Coffee Lab',
+    family: 'Specialty/Third-Wave',
+    profile: 'premium specialty',
+    caffeinePerShot: 78,
+  },
+  {
+    id: 'lucky-goat',
+    name: 'Lucky Goat Coffee',
+    family: 'Specialty/Third-Wave',
+    profile: 'Florida roasted, bright',
+    caffeinePerShot: 76,
+  },
+  {
+    id: 'verve',
+    name: 'Verve Coffee Roasters',
+    family: 'Specialty/Third-Wave',
+    profile: 'California specialty',
+    caffeinePerShot: 75,
+  },
+  {
+    id: 'la-colombe',
+    name: 'La Colombe',
+    family: 'Specialty/Third-Wave',
+    profile: 'smooth craft roast',
+    caffeinePerShot: 77,
+  },
+  {
+    id: 'ritual',
+    name: 'Ritual Coffee Roasters',
+    family: 'Specialty/Third-Wave',
+    profile: 'San Francisco specialty',
+    caffeinePerShot: 76,
+  },
+  {
+    id: 'heart',
+    name: 'Heart Coffee Roasters',
+    family: 'Specialty/Third-Wave',
+    profile: 'Portland precision',
+    caffeinePerShot: 75,
+  },
+  {
+    id: 'revelator',
+    name: 'Revelator Coffee',
+    family: 'Specialty/Third-Wave',
+    profile: 'Southern specialty',
+    caffeinePerShot: 74,
+  },
+  {
+    id: 'philz',
+    name: 'Philz Coffee',
+    family: 'Specialty/Third-Wave',
+    profile: 'custom blended',
+    caffeinePerShot: 76,
+  },
+  {
+    id: 'coava',
+    name: 'Coava Coffee',
+    family: 'Specialty/Third-Wave',
+    profile: 'Portland craft',
+    caffeinePerShot: 75,
+  },
+  {
+    id: 'four-barrel',
+    name: 'Four Barrel Coffee',
+    family: 'Specialty/Third-Wave',
+    profile: 'San Francisco artisan',
+    caffeinePerShot: 76,
+  },
+  {
+    id: 'equator',
+    name: 'Equator Coffees',
+    family: 'Specialty/Third-Wave',
+    profile: 'California organic',
+    caffeinePerShot: 74,
+  },
+  {
+    id: 'sightglass',
+    name: 'Sightglass Coffee',
+    family: 'Specialty/Third-Wave',
+    profile: 'SF roasted precision',
+    caffeinePerShot: 75,
+  },
+  {
+    id: 'klatch',
+    name: 'Klatch Coffee',
+    family: 'Specialty/Third-Wave',
+    profile: 'award-winning roast',
+    caffeinePerShot: 77,
+  },
+  {
+    id: 'ceremony',
+    name: 'Ceremony Coffee Roasters',
+    family: 'Specialty/Third-Wave',
+    profile: 'Annapolis specialty',
+    caffeinePerShot: 74,
+  },
+
+  // GROCERY STORE PREMIUM
+  {
+    id: 'starbucks',
+    name: 'Starbucks',
+    family: 'Grocery Store Premium',
+    profile: 'bold dark roast',
+    caffeinePerShot: 81,
+  },
+  {
+    id: 'starbucks-blonde',
+    name: 'Starbucks Blonde Roast',
+    family: 'Grocery Store Premium',
+    profile: 'mellow, smooth',
+    caffeinePerShot: 85,
+  },
+  {
+    id: 'starbucks-pike',
+    name: 'Starbucks Pike Place',
+    family: 'Grocery Store Premium',
+    profile: 'balanced, smooth',
+    caffeinePerShot: 82,
+  },
+  {
+    id: 'starbucks-espresso',
+    name: 'Starbucks Espresso Roast',
+    family: 'Grocery Store Premium',
+    profile: 'rich, caramelly',
+    caffeinePerShot: 83,
+  },
+  {
+    id: 'starbucks-french',
+    name: 'Starbucks French Roast',
+    family: 'Grocery Store Premium',
+    profile: 'intense, smoky',
+    caffeinePerShot: 80,
+  },
+  {
+    id: 'dunkin-original',
+    name: 'Dunkin\' Original Blend',
+    family: 'Grocery Store Premium',
+    profile: 'smooth, classic',
+    caffeinePerShot: 72,
+  },
+  {
+    id: 'dunkin-dark',
+    name: 'Dunkin\' Dark Roast',
+    family: 'Grocery Store Premium',
+    profile: 'bold, rich',
+    caffeinePerShot: 74,
+  },
+  {
+    id: 'dunkin-medium',
+    name: 'Dunkin\' Medium Roast',
+    family: 'Grocery Store Premium',
+    profile: 'balanced, everyday',
+    caffeinePerShot: 73,
+  },
+  {
+    id: 'caribou',
+    name: 'Caribou Coffee',
+    family: 'Grocery Store Premium',
+    profile: 'smooth chocolate',
+    caffeinePerShot: 76,
+  },
+  {
+    id: 'green-mountain',
+    name: 'Green Mountain Coffee Roasters',
+    family: 'Grocery Store Premium',
+    profile: 'smooth, mild',
+    caffeinePerShot: 72,
+  },
+  {
+    id: 'death-wish',
+    name: 'Death Wish Coffee',
+    family: 'Grocery Store Premium',
+    profile: 'extremely strong',
+    caffeinePerShot: 145,
+  },
+  {
+    id: 'black-rifle',
+    name: 'Black Rifle Coffee Company',
+    family: 'Grocery Store Premium',
+    profile: 'strong, smoky',
+    caffeinePerShot: 86,
+  },
+  {
+    id: 'peets-major-dickason',
+    name: 'Peet\'s Major Dickason\'s Blend',
+    family: 'Grocery Store Premium',
+    profile: 'complex, full-bodied',
+    caffeinePerShot: 82,
+  },
+  {
+    id: 'kirkland-starbucks',
+    name: 'Kirkland Signature (Starbucks)',
+    family: 'Grocery Store Premium',
+    profile: 'smooth, medium',
+    caffeinePerShot: 78,
+  },
+  {
+    id: 'lavazza-super-crema',
+    name: 'Lavazza Super Crema',
+    family: 'Grocery Store Premium',
+    profile: 'creamy Italian blend',
+    caffeinePerShot: 79,
+  },
+  {
+    id: 'seattle-best',
+    name: 'Seattle\'s Best Coffee',
+    family: 'Grocery Store Premium',
+    profile: 'smooth, approachable',
+    caffeinePerShot: 73,
+  },
+  {
+    id: 'gevalia',
+    name: 'Gevalia',
+    family: 'Grocery Store Premium',
+    profile: 'Swedish premium',
+    caffeinePerShot: 74,
+  },
+  {
+    id: 'new-england',
+    name: 'New England Coffee',
+    family: 'Grocery Store Premium',
+    profile: 'regional favorite',
+    caffeinePerShot: 72,
+  },
+
+  // REGIONAL/INTERNATIONAL BRANDS
+  {
+    id: 'tim-hortons',
+    name: 'Tim Hortons',
+    family: 'Regional/International',
+    profile: 'smooth Canadian medium',
+    caffeinePerShot: 70,
+  },
+  {
+    id: 'tchibo',
+    name: 'Tchibo',
+    family: 'Regional/International',
+    profile: 'German balanced',
+    caffeinePerShot: 73,
+  },
+  {
+    id: 'jacobs',
+    name: 'Jacobs Coffee',
+    family: 'Regional/International',
+    profile: 'European smooth',
+    caffeinePerShot: 74,
+  },
+  {
+    id: 'nescafe',
+    name: 'Nescafé',
+    family: 'Regional/International',
+    profile: 'classic instant',
+    caffeinePerShot: 65,
+  },
+  {
+    id: 'kicking-horse',
+    name: 'Kicking Horse Coffee',
+    family: 'Regional/International',
+    profile: 'Canadian specialty bold',
+    caffeinePerShot: 79,
+  },
+  {
+    id: 'mccafe',
+    name: 'McCafé',
+    family: 'Regional/International',
+    profile: 'McDonald\'s smooth blend',
+    caffeinePerShot: 71,
+  },
+  {
+    id: 'costa',
+    name: 'Costa Coffee',
+    family: 'Regional/International',
+    profile: 'British signature blend',
+    caffeinePerShot: 75,
+  },
+  {
+    id: 'peets-coffee-bar',
+    name: 'Peet\'s Coffee Bar Blend',
+    family: 'Regional/International',
+    profile: 'West Coast classic',
+    caffeinePerShot: 81,
+  },
+  {
+    id: 'philz-tesora',
+    name: 'Philz Tesora',
+    family: 'Regional/International',
+    profile: 'San Francisco blend',
+    caffeinePerShot: 77,
+  },
+  {
+    id: 'dutch-bros',
+    name: 'Dutch Bros',
+    family: 'Regional/International',
+    profile: 'smooth Dutch blend',
+    caffeinePerShot: 74,
+  },
+  {
+    id: 'pj-coffee',
+    name: 'PJ\'s Coffee',
+    family: 'Regional/International',
+    profile: 'New Orleans roast',
+    caffeinePerShot: 76,
+  },
+  {
+    id: 'panera',
+    name: 'Panera Bread Coffee',
+    family: 'Regional/International',
+    profile: 'light roast blend',
+    caffeinePerShot: 73,
+  },
+
+  // PREMIUM ORIGIN LABELS
+  {
+    id: 'jamaican-blue-mountain-premium',
+    name: 'Jamaican Blue Mountain (Premium)',
+    family: 'Premium Origin Labels',
+    profile: 'smooth, mild, premium',
+    caffeinePerShot: 68,
+  },
+  {
+    id: 'hawaiian-kona-premium',
+    name: 'Hawaiian Kona (Premium)',
+    family: 'Premium Origin Labels',
+    profile: 'nutty, smooth',
+    caffeinePerShot: 70,
+  },
+  {
+    id: 'panama-geisha-premium',
+    name: 'Panama Geisha (Premium)',
+    family: 'Premium Origin Labels',
+    profile: 'floral, tea-like',
+    caffeinePerShot: 66,
+  },
+  {
+    id: 'ethiopian-yirgacheffe-premium',
+    name: 'Ethiopian Yirgacheffe',
+    family: 'Premium Origin Labels',
+    profile: 'floral citrus',
+    caffeinePerShot: 72,
+  },
+  {
+    id: 'sumatra-mandheling-premium',
+    name: 'Sumatra Mandheling',
+    family: 'Premium Origin Labels',
+    profile: 'earthy bold',
+    caffeinePerShot: 78,
+  },
+  {
+    id: 'kenya-aa-premium',
+    name: 'Kenya AA',
+    family: 'Premium Origin Labels',
+    profile: 'berry bright',
+    caffeinePerShot: 76,
+  },
+  {
+    id: 'colombian-supremo-premium',
+    name: 'Colombian Supremo',
+    family: 'Premium Origin Labels',
+    profile: 'balanced chocolate',
+    caffeinePerShot: 74,
+  },
+];
+
+// Preset blends
+export const presetBlends = [
+  {
+    id: 'breakfast',
+    name: 'Breakfast Blend',
+    description: 'Light, smooth, perfect for morning',
+    flavorNotes: ['bright', 'citrus', 'tea-like', 'mild'],
+    components: [
+      { beanId: 'typica', percentage: 60 },
+      { beanId: 'bourbon', percentage: 40 },
+    ],
+  },
+  {
+    id: 'house',
+    name: 'House Blend',
+    description: 'Balanced, everyday blend',
+    flavorNotes: ['balanced', 'chocolate', 'nutty', 'smooth'],
+    components: [
+      { beanId: 'bourbon', percentage: 50 },
+      { beanId: 'caturra', percentage: 50 },
+    ],
+  },
+  {
+    id: 'espresso',
+    name: 'Espresso Blend',
+    description: 'Chocolate, nutty, rich',
+    flavorNotes: ['rich chocolate', 'nutty', 'caramel', 'bold'],
+    components: [
+      { beanId: 'bourbon', percentage: 50 },
+      { beanId: 'typica', percentage: 30 },
+      { beanId: 'robusta', percentage: 20 },
+    ],
+  },
+];
+
+export const roastLevels = [
+  {
+    id: 'light',
+    name: 'Light Roast',
+    description: 'bright, acidic',
+    caffeineMultiplier: 1.1, // Light roasts have slightly more caffeine
+  },
+  {
+    id: 'medium',
+    name: 'Medium Roast',
+    description: 'balanced',
+    caffeineMultiplier: 1.0,
+  },
+  {
+    id: 'medium-dark',
+    name: 'Medium-Dark Roast',
+    description: 'chocolate, caramel',
+    caffeineMultiplier: 0.98,
+  },
+  {
+    id: 'dark',
+    name: 'Dark Roast',
+    description: 'bold, smoky',
+    caffeineMultiplier: 0.95,
+  },
+];
+
+export const drinkTypes = [
+  // Brewed Coffee
+  {
+    id: 'drip',
+    name: 'Drip Coffee',
+    ratio: 'brewed coffee',
+    foam: 'none',
+    category: 'brewed',
+  },
+  {
+    id: 'pour-over',
+    name: 'Pour Over',
+    ratio: 'hand-brewed coffee',
+    foam: 'none',
+    category: 'brewed',
+  },
+  {
+    id: 'french-press',
+    name: 'French Press',
+    ratio: 'immersion brew',
+    foam: 'none',
+    category: 'brewed',
+  },
+  
+  // Espresso Based
+  {
+    id: 'espresso',
+    name: 'Espresso',
+    ratio: 'straight shot(s)',
+    foam: 'none',
+    category: 'espresso',
+  },
+  {
+    id: 'doppio',
+    name: 'Doppio',
+    ratio: 'double shot',
+    foam: 'none',
+    category: 'espresso',
+  },
+  {
+    id: 'ristretto',
+    name: 'Ristretto',
+    ratio: 'short pull (concentrated)',
+    foam: 'none',
+    category: 'espresso',
+  },
+  {
+    id: 'lungo',
+    name: 'Lungo',
+    ratio: 'long pull (extended)',
+    foam: 'none',
+    category: 'espresso',
+  },
+  {
+    id: 'americano',
+    name: 'Americano',
+    ratio: 'espresso + hot water',
+    foam: 'none',
+    category: 'espresso',
+  },
+  
+  // Milk Based
+  {
+    id: 'latte',
+    name: 'Latte',
+    ratio: 'espresso : milk = 1:4-6',
+    foam: 'thin',
+    category: 'milk',
+  },
+  {
+    id: 'cappuccino',
+    name: 'Cappuccino',
+    ratio: 'espresso : milk = 1:3',
+    foam: 'thick',
+    category: 'milk',
+  },
+  {
+    id: 'flat-white',
+    name: 'Flat White',
+    ratio: 'espresso : milk = 1:3-4',
+    foam: 'microfoam',
+    category: 'milk',
+  },
+  {
+    id: 'cortado',
+    name: 'Cortado',
+    ratio: 'espresso + equal milk',
+    foam: 'none',
+    category: 'milk',
+  },
+  {
+    id: 'macchiato',
+    name: 'Macchiato',
+    ratio: 'espresso + small milk',
+    foam: 'dollop',
+    category: 'milk',
+  },
+  {
+    id: 'mocha',
+    name: 'Mocha',
+    ratio: 'espresso + chocolate + milk',
+    foam: 'thin',
+    category: 'milk',
+  },
+  
+  // Cold Drinks
+  {
+    id: 'iced-coffee',
+    name: 'Iced Coffee',
+    ratio: 'brewed coffee + ice',
+    foam: 'none',
+    category: 'cold',
+  },
+  {
+    id: 'cold-brew',
+    name: 'Cold Brew',
+    ratio: 'long extraction coffee',
+    foam: 'none',
+    category: 'cold',
+  },
+  {
+    id: 'nitro-cold-brew',
+    name: 'Nitro Cold Brew',
+    ratio: 'cold brew + nitrogen',
+    foam: 'creamy head',
+    category: 'cold',
+  },
+  {
+    id: 'iced-latte',
+    name: 'Iced Latte',
+    ratio: 'espresso + cold milk + ice',
+    foam: 'none',
+    category: 'cold',
+  },
+  {
+    id: 'iced-americano',
+    name: 'Iced Americano',
+    ratio: 'espresso + cold water + ice',
+    foam: 'none',
+    category: 'cold',
+  },
+  {
+    id: 'frappe',
+    name: 'Frappé',
+    ratio: 'coffee + milk + ice (blended)',
+    foam: 'none',
+    category: 'cold',
+  },
+];
+
+// Milk nutritional info per oz
+export const milkOptions = [
+  { 
+    id: 'whole', 
+    name: 'Whole Milk',
+    description: 'Rich & creamy classic',
+    caloriesPerOz: 18,
+    sugarPerOz: 1.5,
+    proteinPerOz: 1,
+    fatPerOz: 1,
+  },
+  { 
+    id: 'oat', 
+    name: 'Oat Milk',
+    description: 'Naturally sweet & smooth',
+    caloriesPerOz: 15,
+    sugarPerOz: 1,
+    proteinPerOz: 0.4,
+    fatPerOz: 0.6,
+  },
+  { 
+    id: 'almond', 
+    name: 'Almond Milk',
+    description: 'Light & nutty',
+    caloriesPerOz: 4,
+    sugarPerOz: 0.1,
+    proteinPerOz: 0.2,
+    fatPerOz: 0.3,
+  },
+  { 
+    id: 'soy', 
+    name: 'Soy Milk',
+    description: 'Protein-rich alternative',
+    caloriesPerOz: 10,
+    sugarPerOz: 0.5,
+    proteinPerOz: 0.9,
+    fatPerOz: 0.5,
+  },
+  { 
+    id: '2percent', 
+    name: '2% Milk',
+    description: 'Balanced choice',
+    caloriesPerOz: 15,
+    sugarPerOz: 1.5,
+    proteinPerOz: 1,
+    fatPerOz: 0.6,
+  },
+  { 
+    id: 'skim', 
+    name: 'Skim Milk',
+    description: 'Fat-free traditional',
+    caloriesPerOz: 10,
+    sugarPerOz: 1.5,
+    proteinPerOz: 1,
+    fatPerOz: 0.05,
+  },
+  { 
+    id: 'coconut', 
+    name: 'Coconut Milk',
+    description: 'Tropical & creamy',
+    caloriesPerOz: 6,
+    sugarPerOz: 0.1,
+    proteinPerOz: 0.1,
+    fatPerOz: 0.6,
+  },
+];
+
+export const milkAmounts = [
+  { id: '4oz', name: '4 oz', value: 4 },
+  { id: '6oz', name: '6 oz', value: 6 },
+  { id: '8oz', name: '8 oz', value: 8 },
+  { id: '10oz', name: '10 oz', value: 10 },
+  { id: '12oz', name: '12 oz', value: 12 },
+];
+
+// Sweetener info (per serving)
+export const sweeteners = [
+  { 
+    id: 'none', 
+    name: 'No Sweetener',
+    category: 'None',
+    calories: 0,
+    sugar: 0,
+  },
+  
+  // CLASSIC SUGARS
+  { 
+    id: 'white-sugar', 
+    name: 'White Sugar',
+    category: 'Classic',
+    calories: 16, // per tsp
+    sugar: 4, // g per tsp
+    notes: 'Standard table sugar'
+  },
+  { 
+    id: 'cane-sugar', 
+    name: 'Cane Sugar',
+    category: 'Classic',
+    calories: 16,
+    sugar: 4,
+    notes: 'Natural cane crystals'
+  },
+  { 
+    id: 'raw-sugar', 
+    name: 'Raw Sugar',
+    category: 'Classic',
+    calories: 16,
+    sugar: 4,
+    notes: 'Less processed'
+  },
+  { 
+    id: 'turbinado', 
+    name: 'Turbinado Sugar',
+    category: 'Classic',
+    calories: 16,
+    sugar: 4,
+    notes: 'Large crystals'
+  },
+  { 
+    id: 'demerara', 
+    name: 'Demerara Sugar',
+    category: 'Classic',
+    calories: 16,
+    sugar: 4,
+    notes: 'Rich caramel flavor'
+  },
+  { 
+    id: 'brown-sugar', 
+    name: 'Brown Sugar',
+    category: 'Classic',
+    calories: 17,
+    sugar: 4.5,
+    notes: 'Molasses flavor'
+  },
+  { 
+    id: 'light-brown', 
+    name: 'Light Brown Sugar',
+    category: 'Classic',
+    calories: 17,
+    sugar: 4.5,
+    notes: 'Mild caramel'
+  },
+  { 
+    id: 'dark-brown', 
+    name: 'Dark Brown Sugar',
+    category: 'Classic',
+    calories: 17,
+    sugar: 4.5,
+    notes: 'Strong molasses'
+  },
+
+  // NATURAL SWEETENERS
+  { 
+    id: 'honey', 
+    name: 'Honey',
+    category: 'Natural',
+    liquid: true,
+    calories: 21, // per tsp
+    sugar: 6, // g per tsp
+    notes: 'Floral sweet'
+  },
+  { 
+    id: 'agave', 
+    name: 'Agave Nectar',
+    category: 'Natural',
+    liquid: true,
+    calories: 20,
+    sugar: 5,
+    notes: 'Smooth, mild'
+  },
+  { 
+    id: 'maple', 
+    name: 'Maple Syrup',
+    category: 'Natural',
+    liquid: true,
+    calories: 17,
+    sugar: 4,
+    notes: 'Warm maple flavor'
+  },
+  { 
+    id: 'molasses', 
+    name: 'Molasses',
+    category: 'Natural',
+    liquid: true,
+    calories: 20,
+    sugar: 5,
+    notes: 'Deep caramel'
+  },
+  { 
+    id: 'date-syrup', 
+    name: 'Date Syrup',
+    category: 'Natural',
+    liquid: true,
+    calories: 22,
+    sugar: 5.5,
+    notes: 'Rich fruit sweetness'
+  },
+  { 
+    id: 'coconut-sugar', 
+    name: 'Coconut Sugar',
+    category: 'Natural',
+    calories: 15,
+    sugar: 4,
+    notes: 'Caramel taste'
+  },
+  { 
+    id: 'palm-sugar', 
+    name: 'Palm Sugar',
+    category: 'Natural',
+    calories: 16,
+    sugar: 4,
+    notes: 'Earthy caramel'
+  },
+
+  // ZERO CALORIE / DIET SWEETENERS
+  { 
+    id: 'stevia', 
+    name: 'Stevia',
+    category: 'Zero Calorie',
+    calories: 0,
+    sugar: 0,
+    notes: 'Natural, zero calorie'
+  },
+  { 
+    id: 'monk-fruit', 
+    name: 'Monk Fruit',
+    category: 'Zero Calorie',
+    calories: 0,
+    sugar: 0,
+    notes: 'Natural low calorie'
+  },
+  { 
+    id: 'erythritol', 
+    name: 'Erythritol',
+    category: 'Zero Calorie',
+    calories: 0,
+    sugar: 0,
+    notes: 'Sugar alcohol'
+  },
+  { 
+    id: 'xylitol', 
+    name: 'Xylitol',
+    category: 'Zero Calorie',
+    calories: 10,
+    sugar: 0,
+    notes: 'Mild sweetness'
+  },
+  { 
+    id: 'sucralose', 
+    name: 'Sucralose',
+    category: 'Zero Calorie',
+    calories: 0,
+    sugar: 0,
+    notes: 'Artificial sweetener'
+  },
+  { 
+    id: 'aspartame', 
+    name: 'Aspartame',
+    category: 'Zero Calorie',
+    calories: 0,
+    sugar: 0,
+    notes: 'Artificial'
+  },
+  { 
+    id: 'saccharin', 
+    name: 'Saccharin',
+    category: 'Zero Calorie',
+    calories: 0,
+    sugar: 0,
+    notes: 'Old-school diet sweetener'
+  },
+
+  // SPECIALTY SWEETENERS
+  { 
+    id: 'condensed-milk', 
+    name: 'Sweetened Condensed Milk',
+    category: 'Specialty',
+    calories: 62, // per tsp
+    sugar: 10.5,
+    notes: 'Vietnamese coffee style'
+  },
+  { 
+    id: 'dulce-de-leche', 
+    name: 'Dulce de Leche',
+    category: 'Specialty',
+    calories: 60,
+    sugar: 10,
+    notes: 'Dessert coffee'
+  },
+  { 
+    id: 'lavender-honey', 
+    name: 'Lavender Honey',
+    category: 'Specialty',
+    calories: 21,
+    sugar: 6,
+    notes: 'Floral'
+  },
+  { 
+    id: 'cinnamon-sugar', 
+    name: 'Cinnamon Sugar',
+    category: 'Specialty',
+    calories: 16,
+    sugar: 4,
+    notes: 'Spiced'
+  },
+  { 
+    id: 'vanilla-bean-sugar', 
+    name: 'Vanilla Bean Sugar',
+    category: 'Specialty',
+    calories: 16,
+    sugar: 4,
+    notes: 'Dessert flavor'
+  },
+  { 
+    id: 'brown-sugar-syrup', 
+    name: 'Brown Sugar Syrup',
+    category: 'Specialty',
+    calories: 52, // per tbsp (about 0.5oz)
+    sugar: 13,
+    notes: 'Trending in specialty shops'
+  },
+  { 
+    id: 'golden-syrup', 
+    name: 'Golden Syrup',
+    category: 'Specialty',
+    calories: 60,
+    sugar: 15,
+    notes: 'British classic'
+  },
+  { 
+    id: 'honey-lavender', 
+    name: 'Honey Lavender',
+    category: 'Specialty',
+    calories: 21,
+    sugar: 6,
+    notes: 'Floral twist'
+  },
+  { 
+    id: 'honey-cinnamon', 
+    name: 'Honey Cinnamon',
+    category: 'Specialty',
+    calories: 21,
+    sugar: 6,
+    notes: 'Warm spice'
+  },
+];
+
+// Sweetener amounts for SOLID sweeteners (tsp-based)
+export const sweetenerAmounts = [
+  { id: 'minimal', name: 'Minimal (¼ tsp)', multiplier: 0.25 },
+  { id: 'half', name: 'Half (½ tsp)', multiplier: 0.5 },
+  { id: 'light', name: 'Light (1 tsp)', multiplier: 1 },
+  { id: 'medium', name: 'Medium (2 tsp)', multiplier: 2 },
+  { id: 'sweet', name: 'Sweet (1 tbsp)', multiplier: 3 },
+  { id: 'dessert', name: 'Dessert (2 tbsp)', multiplier: 6 },
+];
+
+// Sweetener amounts for LIQUID sweeteners (oz-based)
+// 1 tsp ≈ 0.17 oz, so we convert the multipliers
+export const liquidSweetenerAmounts = [
+  { id: 'minimal', name: 'Minimal (¼ oz)', multiplier: 0.25 / 0.17 }, // ~1.5 tsp worth
+  { id: 'half', name: 'Half (½ oz)', multiplier: 0.5 / 0.17 }, // ~3 tsp worth
+  { id: 'light', name: 'Light (1 oz)', multiplier: 1 / 0.17 }, // ~6 tsp worth
+  { id: 'medium', name: 'Medium (1.5 oz)', multiplier: 1.5 / 0.17 }, // ~9 tsp worth
+  { id: 'sweet', name: 'Sweet (2 oz)', multiplier: 2 / 0.17 }, // ~12 tsp worth
+  { id: 'dessert', name: 'Dessert (3 oz)', multiplier: 3 / 0.17 }, // ~18 tsp worth
+];
+
+// Flavor syrups (per oz)
+export const flavorSyrups = [
+  { 
+    id: 'none', 
+    name: 'No Syrup',
+    caloriesPerOz: 0,
+    sugarPerOz: 0,
+  },
+  
+  // CORE COFFEE SYRUPS
+  { 
+    id: 'vanilla', 
+    name: 'Vanilla',
+    caloriesPerOz: 80,
+    sugarPerOz: 20,
+  },
+  { 
+    id: 'caramel', 
+    name: 'Caramel',
+    caloriesPerOz: 80,
+    sugarPerOz: 20,
+  },
+  { 
+    id: 'hazelnut', 
+    name: 'Hazelnut',
+    caloriesPerOz: 80,
+    sugarPerOz: 20,
+  },
+  { 
+    id: 'chocolate', 
+    name: 'Chocolate',
+    caloriesPerOz: 90,
+    sugarPerOz: 22,
+  },
+  { 
+    id: 'white-chocolate', 
+    name: 'White Chocolate',
+    caloriesPerOz: 90,
+    sugarPerOz: 22,
+  },
+  { 
+    id: 'mocha', 
+    name: 'Mocha',
+    caloriesPerOz: 90,
+    sugarPerOz: 22,
+  },
+  { 
+    id: 'irish-cream', 
+    name: 'Irish Cream',
+    caloriesPerOz: 85,
+    sugarPerOz: 21,
+  },
+  { 
+    id: 'amaretto', 
+    name: 'Amaretto',
+    caloriesPerOz: 82,
+    sugarPerOz: 20,
+  },
+  { 
+    id: 'toffee', 
+    name: 'Toffee',
+    caloriesPerOz: 85,
+    sugarPerOz: 21,
+  },
+  { 
+    id: 'brown-sugar', 
+    name: 'Brown Sugar',
+    caloriesPerOz: 80,
+    sugarPerOz: 20,
+  },
+  { 
+    id: 'cinnamon', 
+    name: 'Cinnamon',
+    caloriesPerOz: 80,
+    sugarPerOz: 20,
+  },
+  { 
+    id: 'honey', 
+    name: 'Honey',
+    caloriesPerOz: 85,
+    sugarPerOz: 21,
+  },
+  { 
+    id: 'maple', 
+    name: 'Maple',
+    caloriesPerOz: 85,
+    sugarPerOz: 21,
+  },
+  { 
+    id: 'coconut', 
+    name: 'Coconut',
+    caloriesPerOz: 80,
+    sugarPerOz: 20,
+  },
+  { 
+    id: 'butterscotch', 
+    name: 'Butterscotch',
+    caloriesPerOz: 85,
+    sugarPerOz: 21,
+  },
+
+  // DESSERT SYRUPS
+  { 
+    id: 'cookie-dough', 
+    name: 'Cookie Dough',
+    caloriesPerOz: 95,
+    sugarPerOz: 23,
+  },
+  { 
+    id: 'birthday-cake', 
+    name: 'Birthday Cake',
+    caloriesPerOz: 95,
+    sugarPerOz: 23,
+  },
+  { 
+    id: 'cupcake', 
+    name: 'Cupcake',
+    caloriesPerOz: 95,
+    sugarPerOz: 23,
+  },
+  { 
+    id: 'brownie', 
+    name: 'Brownie',
+    caloriesPerOz: 95,
+    sugarPerOz: 23,
+  },
+  { 
+    id: 'cheesecake', 
+    name: 'Cheesecake',
+    caloriesPerOz: 92,
+    sugarPerOz: 22,
+  },
+  { 
+    id: 'creme-brulee', 
+    name: 'Creme Brulee',
+    caloriesPerOz: 92,
+    sugarPerOz: 22,
+  },
+  { 
+    id: 'chocolate-chip', 
+    name: 'Chocolate Chip',
+    caloriesPerOz: 95,
+    sugarPerOz: 23,
+  },
+  { 
+    id: 'smores', 
+    name: 'S\'mores',
+    caloriesPerOz: 95,
+    sugarPerOz: 23,
+  },
+  { 
+    id: 'rocky-road', 
+    name: 'Rocky Road',
+    caloriesPerOz: 95,
+    sugarPerOz: 23,
+  },
+  { 
+    id: 'fudge', 
+    name: 'Fudge',
+    caloriesPerOz: 92,
+    sugarPerOz: 22,
+  },
+
+  // NUT FLAVORS
+  { 
+    id: 'almond', 
+    name: 'Almond',
+    caloriesPerOz: 80,
+    sugarPerOz: 20,
+  },
+  { 
+    id: 'pistachio', 
+    name: 'Pistachio',
+    caloriesPerOz: 82,
+    sugarPerOz: 20,
+  },
+  { 
+    id: 'macadamia', 
+    name: 'Macadamia Nut',
+    caloriesPerOz: 82,
+    sugarPerOz: 20,
+  },
+  { 
+    id: 'peanut-butter', 
+    name: 'Peanut Butter',
+    caloriesPerOz: 88,
+    sugarPerOz: 21,
+  },
+  { 
+    id: 'chestnut', 
+    name: 'Chestnut',
+    caloriesPerOz: 82,
+    sugarPerOz: 20,
+  },
+  { 
+    id: 'walnut', 
+    name: 'Walnut',
+    caloriesPerOz: 82,
+    sugarPerOz: 20,
+  },
+
+  // FRUIT SYRUPS
+  { 
+    id: 'strawberry', 
+    name: 'Strawberry',
+    caloriesPerOz: 78,
+    sugarPerOz: 19,
+  },
+  { 
+    id: 'raspberry', 
+    name: 'Raspberry',
+    caloriesPerOz: 78,
+    sugarPerOz: 19,
+  },
+  { 
+    id: 'blackberry', 
+    name: 'Blackberry',
+    caloriesPerOz: 78,
+    sugarPerOz: 19,
+  },
+  { 
+    id: 'blueberry', 
+    name: 'Blueberry',
+    caloriesPerOz: 78,
+    sugarPerOz: 19,
+  },
+  { 
+    id: 'cherry', 
+    name: 'Cherry',
+    caloriesPerOz: 80,
+    sugarPerOz: 20,
+  },
+  { 
+    id: 'peach', 
+    name: 'Peach',
+    caloriesPerOz: 78,
+    sugarPerOz: 19,
+  },
+  { 
+    id: 'mango', 
+    name: 'Mango',
+    caloriesPerOz: 78,
+    sugarPerOz: 19,
+  },
+  { 
+    id: 'pineapple', 
+    name: 'Pineapple',
+    caloriesPerOz: 78,
+    sugarPerOz: 19,
+  },
+  { 
+    id: 'passion-fruit', 
+    name: 'Passion Fruit',
+    caloriesPerOz: 78,
+    sugarPerOz: 19,
+  },
+  { 
+    id: 'orange', 
+    name: 'Orange',
+    caloriesPerOz: 78,
+    sugarPerOz: 19,
+  },
+  { 
+    id: 'lemon', 
+    name: 'Lemon',
+    caloriesPerOz: 75,
+    sugarPerOz: 18,
+  },
+  { 
+    id: 'lime', 
+    name: 'Lime',
+    caloriesPerOz: 75,
+    sugarPerOz: 18,
+  },
+
+  // SPICE / WARM FLAVORS
+  { 
+    id: 'pumpkin-spice', 
+    name: 'Pumpkin Spice',
+    caloriesPerOz: 82,
+    sugarPerOz: 20,
+  },
+  { 
+    id: 'gingerbread', 
+    name: 'Gingerbread',
+    caloriesPerOz: 82,
+    sugarPerOz: 20,
+  },
+  { 
+    id: 'clove', 
+    name: 'Clove',
+    caloriesPerOz: 80,
+    sugarPerOz: 20,
+  },
+  { 
+    id: 'nutmeg', 
+    name: 'Nutmeg',
+    caloriesPerOz: 80,
+    sugarPerOz: 20,
+  },
+  { 
+    id: 'cardamom', 
+    name: 'Cardamom',
+    caloriesPerOz: 80,
+    sugarPerOz: 20,
+  },
+  { 
+    id: 'chai', 
+    name: 'Chai',
+    caloriesPerOz: 82,
+    sugarPerOz: 20,
+  },
+  { 
+    id: 'peppermint', 
+    name: 'Peppermint',
+    caloriesPerOz: 80,
+    sugarPerOz: 20,
+  },
+  { 
+    id: 'spearmint', 
+    name: 'Spearmint',
+    caloriesPerOz: 80,
+    sugarPerOz: 20,
+  },
+  { 
+    id: 'lavender', 
+    name: 'Lavender',
+    caloriesPerOz: 78,
+    sugarPerOz: 19,
+  },
+
+  // CANDY-INSPIRED FLAVORS
+  { 
+    id: 'cotton-candy', 
+    name: 'Cotton Candy',
+    caloriesPerOz: 95,
+    sugarPerOz: 24,
+  },
+  { 
+    id: 'bubble-gum', 
+    name: 'Bubble Gum',
+    caloriesPerOz: 95,
+    sugarPerOz: 24,
+  },
+  { 
+    id: 'root-beer', 
+    name: 'Root Beer',
+    caloriesPerOz: 88,
+    sugarPerOz: 22,
+  },
+  { 
+    id: 'cola', 
+    name: 'Cola',
+    caloriesPerOz: 88,
+    sugarPerOz: 22,
+  },
+  { 
+    id: 'candy-cane', 
+    name: 'Candy Cane',
+    caloriesPerOz: 82,
+    sugarPerOz: 20,
+  },
+  { 
+    id: 'salted-caramel', 
+    name: 'Salted Caramel',
+    caloriesPerOz: 85,
+    sugarPerOz: 21,
+  },
+
+  // ALCOHOL-INSPIRED (non-alcoholic)
+  { 
+    id: 'bourbon', 
+    name: 'Bourbon',
+    caloriesPerOz: 82,
+    sugarPerOz: 20,
+  },
+  { 
+    id: 'rum', 
+    name: 'Rum',
+    caloriesPerOz: 82,
+    sugarPerOz: 20,
+  },
+  { 
+    id: 'brandy', 
+    name: 'Brandy',
+    caloriesPerOz: 82,
+    sugarPerOz: 20,
+  },
+  { 
+    id: 'kahlua', 
+    name: 'Kahlua',
+    caloriesPerOz: 90,
+    sugarPerOz: 22,
+  },
+  { 
+    id: 'baileys', 
+    name: 'Baileys Irish Cream',
+    caloriesPerOz: 88,
+    sugarPerOz: 21,
+  },
+  { 
+    id: 'tiramisu', 
+    name: 'Tiramisu',
+    caloriesPerOz: 92,
+    sugarPerOz: 22,
+  },
+
+  // EXOTIC / GOURMET SYRUPS
+  { 
+    id: 'rose', 
+    name: 'Rose',
+    caloriesPerOz: 78,
+    sugarPerOz: 19,
+  },
+  { 
+    id: 'hibiscus', 
+    name: 'Hibiscus',
+    caloriesPerOz: 75,
+    sugarPerOz: 18,
+  },
+  { 
+    id: 'elderflower', 
+    name: 'Elderflower',
+    caloriesPerOz: 78,
+    sugarPerOz: 19,
+  },
+  { 
+    id: 'matcha', 
+    name: 'Matcha',
+    caloriesPerOz: 80,
+    sugarPerOz: 20,
+  },
+  { 
+    id: 'yuzu', 
+    name: 'Yuzu',
+    caloriesPerOz: 75,
+    sugarPerOz: 18,
+  },
+  { 
+    id: 'tamarind', 
+    name: 'Tamarind',
+    caloriesPerOz: 78,
+    sugarPerOz: 19,
+  },
+  { 
+    id: 'lychee', 
+    name: 'Lychee',
+    caloriesPerOz: 78,
+    sugarPerOz: 19,
+  },
+  { 
+    id: 'ube', 
+    name: 'Ube',
+    caloriesPerOz: 85,
+    sugarPerOz: 21,
+  },
+  { 
+    id: 'turmeric', 
+    name: 'Turmeric',
+    caloriesPerOz: 72,
+    sugarPerOz: 18,
+  },
+
+  // SUGAR ALTERNATIVES
+  { 
+    id: 'sugar-free-vanilla', 
+    name: 'Sugar-Free Vanilla',
+    caloriesPerOz: 5,
+    sugarPerOz: 0,
+  },
+  { 
+    id: 'sugar-free-caramel', 
+    name: 'Sugar-Free Caramel',
+    caloriesPerOz: 5,
+    sugarPerOz: 0,
+  },
+  { 
+    id: 'sugar-free-hazelnut', 
+    name: 'Sugar-Free Hazelnut',
+    caloriesPerOz: 5,
+    sugarPerOz: 0,
+  },
+  { 
+    id: 'stevia', 
+    name: 'Stevia Syrup',
+    caloriesPerOz: 0,
+    sugarPerOz: 0,
+  },
+  { 
+    id: 'agave', 
+    name: 'Agave Syrup',
+    caloriesPerOz: 60,
+    sugarPerOz: 16,
+  },
+];
+
+export const syrupAmounts = [
+  { id: 'light', name: 'Light (½ oz)', value: 0.5 },
+  { id: 'standard', name: 'Standard (1 oz)', value: 1 },
+  { id: 'sweet', name: 'Sweet (1.5 oz)', value: 1.5 },
+];
+
+// Toppings (nutritional info per serving)
+export const toppings = [
+  // CREAM & FOAM TOPPINGS
+  { 
+    id: 'whipped-cream', 
+    name: 'Whipped Cream',
+    serving: '2 tbsp',
+    category: 'Cream & Foam',
+    calories: 50,
+    sugar: 1,
+    protein: 0.5,
+    fat: 5,
+  },
+  { 
+    id: 'sweet-cream-foam', 
+    name: 'Sweet Cream Foam',
+    serving: '2 oz',
+    category: 'Cream & Foam',
+    calories: 40,
+    sugar: 3,
+    protein: 0.5,
+    fat: 3,
+  },
+  { 
+    id: 'cold-foam', 
+    name: 'Cold Foam',
+    serving: '2 oz',
+    category: 'Cream & Foam',
+    calories: 20,
+    sugar: 2,
+    protein: 1,
+    fat: 0.5,
+  },
+  { 
+    id: 'vanilla-sweet-cream', 
+    name: 'Vanilla Sweet Cream',
+    serving: '1 oz',
+    category: 'Cream & Foam',
+    calories: 45,
+    sugar: 4,
+    protein: 0.5,
+    fat: 3,
+  },
+  { 
+    id: 'chocolate-foam', 
+    name: 'Chocolate Foam',
+    serving: '2 oz',
+    category: 'Cream & Foam',
+    calories: 35,
+    sugar: 4,
+    protein: 0.5,
+    fat: 2,
+  },
+  { 
+    id: 'salted-caramel-foam', 
+    name: 'Salted Caramel Foam',
+    serving: '2 oz',
+    category: 'Cream & Foam',
+    calories: 45,
+    sugar: 5,
+    protein: 0.5,
+    fat: 3,
+  },
+  { 
+    id: 'irish-cream-foam', 
+    name: 'Irish Cream Foam',
+    serving: '2 oz',
+    category: 'Cream & Foam',
+    calories: 40,
+    sugar: 4,
+    protein: 0.5,
+    fat: 3,
+  },
+
+  // DESSERT DRIZZLES
+  { 
+    id: 'chocolate-drizzle', 
+    name: 'Chocolate Drizzle',
+    serving: '0.5 oz',
+    category: 'Drizzles',
+    calories: 30,
+    sugar: 6,
+    protein: 0,
+    fat: 1,
+  },
+  { 
+    id: 'caramel-drizzle', 
+    name: 'Caramel Drizzle',
+    serving: '0.5 oz',
+    category: 'Drizzles',
+    calories: 35,
+    sugar: 7,
+    protein: 0,
+    fat: 1,
+  },
+  { 
+    id: 'white-chocolate-drizzle', 
+    name: 'White Chocolate Drizzle',
+    serving: '0.5 oz',
+    category: 'Drizzles',
+    calories: 35,
+    sugar: 7,
+    protein: 0,
+    fat: 1.5,
+  },
+  { 
+    id: 'fudge-sauce', 
+    name: 'Fudge Sauce',
+    serving: '0.5 oz',
+    category: 'Drizzles',
+    calories: 40,
+    sugar: 8,
+    protein: 0.5,
+    fat: 2,
+  },
+  { 
+    id: 'honey-drizzle', 
+    name: 'Honey Drizzle',
+    serving: '1 tsp',
+    category: 'Drizzles',
+    calories: 25,
+    sugar: 6,
+    protein: 0,
+    fat: 0,
+  },
+  { 
+    id: 'maple-drizzle', 
+    name: 'Maple Drizzle',
+    serving: '1 tsp',
+    category: 'Drizzles',
+    calories: 30,
+    sugar: 7,
+    protein: 0,
+    fat: 0,
+  },
+
+  // POWDER TOPPINGS
+  { 
+    id: 'cocoa-powder', 
+    name: 'Cocoa Powder',
+    serving: '1 tsp',
+    category: 'Powders',
+    calories: 10,
+    sugar: 0,
+    protein: 1,
+    fat: 0.5,
+  },
+  { 
+    id: 'cinnamon-powder', 
+    name: 'Cinnamon',
+    serving: '½ tsp',
+    category: 'Powders',
+    calories: 5,
+    sugar: 0,
+    protein: 0,
+    fat: 0,
+  },
+  { 
+    id: 'nutmeg-powder', 
+    name: 'Nutmeg',
+    serving: '¼ tsp',
+    category: 'Powders',
+    calories: 5,
+    sugar: 0,
+    protein: 0,
+    fat: 0,
+  },
+  { 
+    id: 'pumpkin-spice-powder', 
+    name: 'Pumpkin Spice',
+    serving: '½ tsp',
+    category: 'Powders',
+    calories: 5,
+    sugar: 1,
+    protein: 0,
+    fat: 0,
+  },
+  { 
+    id: 'matcha-powder', 
+    name: 'Matcha Powder',
+    serving: '½ tsp',
+    category: 'Powders',
+    calories: 10,
+    sugar: 0,
+    protein: 1,
+    fat: 0,
+  },
+  { 
+    id: 'chocolate-powder', 
+    name: 'Chocolate Powder',
+    serving: '1 tsp',
+    category: 'Powders',
+    calories: 15,
+    sugar: 2,
+    protein: 0.5,
+    fat: 0.5,
+  },
+  { 
+    id: 'vanilla-powder', 
+    name: 'Vanilla Powder',
+    serving: '½ tsp',
+    category: 'Powders',
+    calories: 5,
+    sugar: 1,
+    protein: 0,
+    fat: 0,
+  },
+
+  // CRUNCH / TEXTURE TOPPINGS
+  { 
+    id: 'chocolate-chips', 
+    name: 'Chocolate Chips',
+    serving: '1 tbsp',
+    category: 'Crunch',
+    calories: 70,
+    sugar: 8,
+    protein: 1,
+    fat: 4,
+  },
+  { 
+    id: 'cookie-crumbles', 
+    name: 'Cookie Crumbles',
+    serving: '1 tbsp',
+    category: 'Crunch',
+    calories: 60,
+    sugar: 6,
+    protein: 0.5,
+    fat: 3,
+  },
+  { 
+    id: 'oreo-crumbles', 
+    name: 'Oreo Crumbles',
+    serving: '1 tbsp',
+    category: 'Crunch',
+    calories: 65,
+    sugar: 7,
+    protein: 0.5,
+    fat: 3,
+  },
+  { 
+    id: 'caramel-crunch', 
+    name: 'Caramel Crunch',
+    serving: '1 tbsp',
+    category: 'Crunch',
+    calories: 55,
+    sugar: 8,
+    protein: 0,
+    fat: 2,
+  },
+  { 
+    id: 'toffee-bits', 
+    name: 'Toffee Bits',
+    serving: '1 tbsp',
+    category: 'Crunch',
+    calories: 50,
+    sugar: 7,
+    protein: 0,
+    fat: 2,
+  },
+  { 
+    id: 'brown-sugar-crumble', 
+    name: 'Brown Sugar Crumble',
+    serving: '1 tbsp',
+    category: 'Crunch',
+    calories: 45,
+    sugar: 9,
+    protein: 0,
+    fat: 1,
+  },
+  { 
+    id: 'graham-cracker-crumbs', 
+    name: 'Graham Cracker Crumbs',
+    serving: '1 tbsp',
+    category: 'Crunch',
+    calories: 40,
+    sugar: 5,
+    protein: 0.5,
+    fat: 1.5,
+  },
+
+  // FUNCTIONAL ADD-INS
+  { 
+    id: 'collagen-powder', 
+    name: 'Collagen Powder',
+    serving: '1 scoop',
+    category: 'Functional',
+    calories: 35,
+    sugar: 0,
+    protein: 9,
+    fat: 0,
+  },
+  { 
+    id: 'mct-oil', 
+    name: 'MCT Oil',
+    serving: '1 tbsp',
+    category: 'Functional',
+    calories: 115,
+    sugar: 0,
+    protein: 0,
+    fat: 14,
+  },
+  { 
+    id: 'butter', 
+    name: 'Butter (Bulletproof)',
+    serving: '1 tbsp',
+    category: 'Functional',
+    calories: 100,
+    sugar: 0,
+    protein: 0,
+    fat: 11,
+  },
+  { 
+    id: 'protein-powder', 
+    name: 'Protein Powder',
+    serving: '1 scoop',
+    category: 'Functional',
+    calories: 80,
+    sugar: 1,
+    protein: 15,
+    fat: 1,
+  },
+  { 
+    id: 'electrolyte-powder', 
+    name: 'Electrolyte Powder',
+    serving: '1 packet',
+    category: 'Functional',
+    calories: 10,
+    sugar: 2,
+    protein: 0,
+    fat: 0,
+  },
+  { 
+    id: 'adaptogen-mushrooms', 
+    name: 'Adaptogen Mushrooms',
+    serving: '½ tsp',
+    category: 'Functional',
+    calories: 15,
+    sugar: 0,
+    protein: 1,
+    fat: 0,
+  },
+
+  // VISUAL / FINISHING TOPPINGS
+  { 
+    id: 'gold-sugar-crystals', 
+    name: 'Gold Sugar Crystals',
+    serving: '1 tsp',
+    category: 'Visual',
+    calories: 20,
+    sugar: 5,
+    protein: 0,
+    fat: 0,
+  },
+  { 
+    id: 'colored-sugar', 
+    name: 'Colored Sugar',
+    serving: '1 tsp',
+    category: 'Visual',
+    calories: 20,
+    sugar: 5,
+    protein: 0,
+    fat: 0,
+  },
+  { 
+    id: 'chocolate-shavings', 
+    name: 'Chocolate Shavings',
+    serving: '1 tbsp',
+    category: 'Visual',
+    calories: 30,
+    sugar: 3,
+    protein: 1,
+    fat: 2,
+  },
+  { 
+    id: 'caramel-crystals', 
+    name: 'Caramel Crystals',
+    serving: '1 tsp',
+    category: 'Visual',
+    calories: 25,
+    sugar: 6,
+    protein: 0,
+    fat: 0,
+  },
+  { 
+    id: 'edible-flowers', 
+    name: 'Edible Flowers',
+    serving: '3-5 petals',
+    category: 'Visual',
+    calories: 0,
+    sugar: 0,
+    protein: 0,
+    fat: 0,
+  },
+];
+
+export const sampleRecipes: CoffeeRecipe[] = [
+  {
+    id: '1',
+    name: 'Classic Gesha Latte',
+    customBlend: {
+      id: 'gesha-blend',
+      name: 'Pure Gesha',
+      components: [
+        { beanId: 'gesha', percentage: 100 },
+      ],
+    },
+    roast: 'light',
+    drinkType: 'latte',
+    espressoShots: 2,
+    milk: 'oat',
+    milkAmount: '8oz',
+    sweetener: 'none',
+    flavorSyrup: 'none',
+    description: 'Delicate jasmine and bergamot notes with oat milk',
+  },
+  {
+    id: '2',
+    name: 'High Caffeine Robusta Americano',
+    customBlend: {
+      id: 'robusta-blend',
+      name: 'Pure Power',
+      components: [
+        { beanId: 'robusta', percentage: 100 },
+      ],
+    },
+    roast: 'dark',
+    drinkType: 'americano',
+    espressoShots: 3,
+    sweetener: 'none',
+    flavorSyrup: 'none',
+    description: '420mg of caffeine - maximum energy boost!',
+  },
+  {
+    id: '3',
+    name: 'Ethiopian Heirloom Flight',
+    customBlend: {
+      id: 'ethiopian-mix',
+      name: 'Ethiopian Medley',
+      components: [
+        { beanId: 'heirloom-ethiopian', percentage: 40 },
+        { beanId: 'kurume', percentage: 30 },
+        { beanId: 'wolisho', percentage: 30 },
+      ],
+    },
+    roast: 'light',
+    drinkType: 'latte',
+    espressoShots: 2,
+    milk: 'whole',
+    milkAmount: '8oz',
+    sweetener: 'honey',
+    sweetenerAmount: 'light',
+    flavorSyrup: 'none',
+    description: 'Complex floral and fruity Ethiopian blend',
+  },
+  {
+    id: '4',
+    name: 'Bourbon Family Blend',
+    customBlend: {
+      id: 'bourbon-rainbow',
+      name: 'Rainbow Bourbon',
+      components: [
+        { beanId: 'red-bourbon', percentage: 40 },
+        { beanId: 'yellow-bourbon', percentage: 30 },
+        { beanId: 'pink-bourbon', percentage: 30 },
+      ],
+    },
+    roast: 'medium',
+    drinkType: 'cappuccino',
+    espressoShots: 2,
+    milk: 'whole',
+    milkAmount: '6oz',
+    sweetener: 'none',
+    flavorSyrup: 'none',
+    description: 'Sweet, fruity, and floral bourbon variety blend',
+  },
+];

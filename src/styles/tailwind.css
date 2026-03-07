@@ -1,0 +1,18 @@
+@import 'tailwindcss' source(none);
+@source '../**/*.{js,ts,jsx,tsx}';
+
+@import 'tw-animate-css';
+
+@theme {
+  /* Coffee-themed color palette */
+  --color-coffee-50: #FAF8F5;
+  --color-coffee-100: #F6F3EE;
+  --color-coffee-200: #EAD9C9;
+  --color-coffee-300: #DEC0A4;
+  --color-coffee-400: #D88A3D;
+  --color-coffee-500: #E46A2A;
+  --color-coffee-600: #C55A22;
+  --color-coffee-700: #5C3A21;
+  --color-coffee-800: #4A2E1A;
+  --color-coffee-900: #3B2415;
+}
