@@ -568,14 +568,14 @@ export function CoffeeBuilder({ initialRecipe }: CoffeeBuilderProps) {
                 <input
                   type="range"
                   min="0"
-                  max="4"
+                  max="10"
                   value={espressoShots}
                   onChange={(e) => setEspressoShots(Number(e.target.value))}
                   className="w-full"
                 />
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
                   <span>0 shots</span>
-                  <span>4 shots</span>
+                  <span>10 shots</span>
                 </div>
               </div>
 
