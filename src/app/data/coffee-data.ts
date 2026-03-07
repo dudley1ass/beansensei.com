@@ -1038,6 +1038,13 @@ export const drinkTypes = [
     foam: 'none',
     category: 'brewed',
   },
+  {
+    id: 'moka-pot',
+    name: 'Moka Pot',
+    ratio: 'stovetop pressure brew',
+    foam: 'none',
+    category: 'brewed',
+  },
   
   // Espresso Based
   {
@@ -2509,5 +2516,24 @@ export const sampleRecipes: CoffeeRecipe[] = [
     sweetener: 'none',
     flavorSyrup: 'none',
     description: 'Sweet, fruity, and floral bourbon variety blend',
+  },
+  {
+    id: '5',
+    name: 'Italian Moka Pot Classic',
+    customBlend: {
+      id: 'italian-moka',
+      name: 'Italian Stovetop Blend',
+      components: [
+        { beanId: 'lavazza', percentage: 60 },
+        { beanId: 'illy', percentage: 40 },
+      ],
+    },
+    roast: 'medium-dark',
+    drinkType: 'moka-pot',
+    espressoShots: 0,
+    sweetener: 'sugar',
+    sweetenerAmount: 'light',
+    flavorSyrup: 'none',
+    description: 'Traditional Italian stovetop coffee - rich and bold with a smooth finish',
   },
 ];

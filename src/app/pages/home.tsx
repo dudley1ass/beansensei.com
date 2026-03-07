@@ -15,8 +15,8 @@ export function Home() {
           <div className="flex items-center gap-3">
             <Coffee className="size-8 text-amber-700" />
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Coffee Recipe Builder</h1>
-              <p className="text-sm text-gray-600">Create custom blends with nutritional metrics • Download as PDF</p>
+              <h1 className="text-3xl font-bold text-gray-900">BeanSensei</h1>
+              <p className="text-sm text-gray-600">Master the Art of Coffee • Create custom blends with nutritional metrics</p>
             </div>
           </div>
         </div>

@@ -46,9 +46,15 @@ export function calculateNutrition(recipe: CoffeeRecipe): NutritionalInfo {
   
   // Calculate caffeine based on drink type
   if (category === 'brewed') {
-    // Brewed coffee: assume standard 8oz serving = ~95mg caffeine
-    // This is the BASE coffee, not from espresso shots
-    caffeine = 95 * caffeineMultiplier;
+    // Check if it's a Moka pot (stovetop pressure brew)
+    if (recipe.drinkType === 'moka-pot') {
+      // Moka pot: produces ~4-6oz of concentrated coffee
+      // Caffeine is between drip and espresso: ~150mg per serving
+      caffeine = 150 * caffeineMultiplier;
+    } else {
+      // Regular brewed coffee: assume standard 8oz serving = ~95mg caffeine
+      caffeine = 95 * caffeineMultiplier;
+    }
     
     // Add espresso shots if any (additional)
     if (recipe.espressoShots && recipe.espressoShots > 0) {
