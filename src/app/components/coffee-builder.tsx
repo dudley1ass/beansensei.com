@@ -586,27 +586,78 @@ export function CoffeeBuilder({ initialRecipe }: CoffeeBuilderProps) {
                     5
                   </div>
                   <label className="text-base font-bold text-blue-500 uppercase tracking-wide">
-                    Milk (Optional)
+                    Milk & Creamers (Optional)
                   </label>
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <p className="text-xs font-medium text-gray-500 mb-2">Milk Type</p>
+                    <p className="text-xs font-medium text-gray-500 mb-2">Select Milk or Creamer</p>
                     <select
                       value={milk}
                       onChange={(e) => setMilk(e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                     >
-                      <option value="none">No Milk</option>
-                      {milkOptions.map((m) => (
-                        <option key={m.id} value={m.id}>{m.name}</option>
-                      ))}
+                      <option value="none">No Milk/Creamer</option>
+                      
+                      <optgroup label="Regular Milk">
+                        {milkOptions.filter(m => ['whole', '2percent', 'skim'].includes(m.id)).map((m) => (
+                          <option key={m.id} value={m.id}>{m.name}</option>
+                        ))}
+                      </optgroup>
+                      
+                      <optgroup label="Plant-Based Milk">
+                        {milkOptions.filter(m => ['oat', 'almond', 'soy', 'coconut'].includes(m.id)).map((m) => (
+                          <option key={m.id} value={m.id}>{m.name}</option>
+                        ))}
+                      </optgroup>
+                      
+                      <optgroup label="Dairy Creamers">
+                        {milkOptions.filter(m => ['half-and-half', 'heavy-cream', 'light-cream'].includes(m.id)).map((m) => (
+                          <option key={m.id} value={m.id}>{m.name}</option>
+                        ))}
+                      </optgroup>
+                      
+                      <optgroup label="Flavored Dairy Creamers">
+                        {milkOptions.filter(m => [
+                          'french-vanilla-creamer', 'hazelnut-creamer', 'caramel-creamer', 
+                          'irish-cream-creamer', 'pumpkin-spice-creamer', 'peppermint-mocha-creamer',
+                          'cinnamon-vanilla-creamer', 'italian-sweet-cream-creamer'
+                        ].includes(m.id)).map((m) => (
+                          <option key={m.id} value={m.id}>{m.name}</option>
+                        ))}
+                      </optgroup>
+                      
+                      <optgroup label="Non-Dairy Creamers">
+                        {milkOptions.filter(m => [
+                          'non-dairy-original', 'coconut-cream-creamer', 'almond-vanilla-creamer',
+                          'oat-creamer', 'soy-vanilla-creamer'
+                        ].includes(m.id)).map((m) => (
+                          <option key={m.id} value={m.id}>{m.name}</option>
+                        ))}
+                      </optgroup>
+                      
+                      <optgroup label="Sugar-Free Creamers">
+                        {milkOptions.filter(m => [
+                          'sugar-free-vanilla-creamer', 'sugar-free-hazelnut-creamer', 'sugar-free-caramel-creamer'
+                        ].includes(m.id)).map((m) => (
+                          <option key={m.id} value={m.id}>{m.name}</option>
+                        ))}
+                      </optgroup>
+                      
+                      <optgroup label="Premium Specialty Creamers">
+                        {milkOptions.filter(m => [
+                          'sweet-foam-creamer', 'brown-sugar-oat-creamer', 'cinnamon-dolce-creamer',
+                          'white-chocolate-creamer', 'mocha-creamer', 'salted-caramel-creamer', 'toffee-nut-creamer'
+                        ].includes(m.id)).map((m) => (
+                          <option key={m.id} value={m.id}>{m.name}</option>
+                        ))}
+                      </optgroup>
                     </select>
                   </div>
 
                   {milk !== 'none' && (
                     <div>
-                      <p className="text-xs font-medium text-gray-500 mb-2">Milk Amount</p>
+                      <p className="text-xs font-medium text-gray-500 mb-2">Amount</p>
                       <div className="flex gap-2">
                         <select
                           value={milkAmounts.some(a => a.id === milkAmount) ? milkAmount : 'custom'}
