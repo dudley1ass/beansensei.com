@@ -652,6 +652,75 @@ export function CoffeeBuilder({ initialRecipe }: CoffeeBuilderProps) {
                           <option key={m.id} value={m.id}>{m.name}</option>
                         ))}
                       </optgroup>
+                      
+                      <optgroup label="Starbucks Creamers">
+                        {milkOptions.filter(m => [
+                          'starbucks-caramel-macchiato', 'starbucks-white-chocolate-mocha', 'starbucks-pumpkin-spice-latte',
+                          'starbucks-vanilla-latte', 'starbucks-cinnamon-dolce-latte', 'starbucks-hazelnut-latte'
+                        ].includes(m.id)).map((m) => (
+                          <option key={m.id} value={m.id}>{m.name}</option>
+                        ))}
+                      </optgroup>
+                      
+                      <optgroup label="Dunkin' Creamers">
+                        {milkOptions.filter(m => [
+                          'dunkin-french-vanilla', 'dunkin-caramel', 'dunkin-hazelnut',
+                          'dunkin-mocha', 'dunkin-pumpkin-spice', 'dunkin-extra-extra'
+                        ].includes(m.id)).map((m) => (
+                          <option key={m.id} value={m.id}>{m.name}</option>
+                        ))}
+                      </optgroup>
+                      
+                      <optgroup label="International Delight">
+                        {milkOptions.filter(m => [
+                          'intl-delight-french-vanilla', 'intl-delight-caramel-macchiato', 'intl-delight-hazelnut',
+                          'intl-delight-irish-cream', 'intl-delight-vanilla-latte', 'intl-delight-pumpkin-pie-spice',
+                          'intl-delight-almond-joy', 'intl-delight-cinnabon'
+                        ].includes(m.id)).map((m) => (
+                          <option key={m.id} value={m.id}>{m.name}</option>
+                        ))}
+                      </optgroup>
+                      
+                      <optgroup label="Coffee mate">
+                        {milkOptions.filter(m => [
+                          'coffee-mate-original', 'coffee-mate-french-vanilla', 'coffee-mate-hazelnut',
+                          'coffee-mate-italian-sweet-creme', 'coffee-mate-vanilla-caramel', 'coffee-mate-pumpkin-spice'
+                        ].includes(m.id)).map((m) => (
+                          <option key={m.id} value={m.id}>{m.name}</option>
+                        ))}
+                      </optgroup>
+                      
+                      <optgroup label="Chobani Coffee Creamers">
+                        {milkOptions.filter(m => [
+                          'chobani-sweet-cream', 'chobani-vanilla', 'chobani-hazelnut', 'chobani-caramel'
+                        ].includes(m.id)).map((m) => (
+                          <option key={m.id} value={m.id}>{m.name}</option>
+                        ))}
+                      </optgroup>
+                      
+                      <optgroup label="Califia Farms">
+                        {milkOptions.filter(m => [
+                          'califia-better-half-original', 'califia-better-half-vanilla', 'califia-better-half-hazelnut', 'califia-oat-creamer'
+                        ].includes(m.id)).map((m) => (
+                          <option key={m.id} value={m.id}>{m.name}</option>
+                        ))}
+                      </optgroup>
+                      
+                      <optgroup label="Silk">
+                        {milkOptions.filter(m => [
+                          'silk-soy-creamer-original', 'silk-soy-creamer-vanilla', 'silk-oat-creamer'
+                        ].includes(m.id)).map((m) => (
+                          <option key={m.id} value={m.id}>{m.name}</option>
+                        ))}
+                      </optgroup>
+                      
+                      <optgroup label="nutpods (Unsweetened)">
+                        {milkOptions.filter(m => [
+                          'nutpods-french-vanilla', 'nutpods-hazelnut', 'nutpods-caramel', 'nutpods-oat'
+                        ].includes(m.id)).map((m) => (
+                          <option key={m.id} value={m.id}>{m.name}</option>
+                        ))}
+                      </optgroup>
                     </select>
                   </div>
 
