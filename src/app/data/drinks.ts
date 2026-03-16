@@ -214,3 +214,74 @@ export const milkAmounts = [
   { id: '10oz', name: '10 oz', value: 10 },
   { id: '12oz', name: '12 oz', value: 12 },
 ];
+
+// Grind sizes - maps to brew methods
+export const grindSizes = [
+  { id: 'extra-fine',    name: 'Extra Fine',    microns: 150,  description: 'Turkish coffee' },
+  { id: 'fine',          name: 'Fine',          microns: 300,  description: 'Espresso, Moka Pot' },
+  { id: 'medium-fine',   name: 'Medium-Fine',   microns: 500,  description: 'Pour Over, AeroPress' },
+  { id: 'medium',        name: 'Medium',        microns: 750,  description: 'Drip, Siphon' },
+  { id: 'medium-coarse', name: 'Medium-Coarse', microns: 900,  description: 'Chemex, Flat-bottom drip' },
+  { id: 'coarse',        name: 'Coarse',        microns: 1100, description: 'French Press, Percolator' },
+  { id: 'extra-coarse',  name: 'Extra Coarse',  microns: 1400, description: 'Cold Brew' },
+];
+
+// Default grind size per drink type
+export const defaultGrindByDrink: Record<string, string> = {
+  'drip':           'medium',
+  'pour-over':      'medium-fine',
+  'espresso':       'fine',
+  'americano':      'fine',
+  'latte':          'fine',
+  'cappuccino':     'fine',
+  'flat-white':     'fine',
+  'cortado':        'fine',
+  'macchiato':      'fine',
+  'mocha':          'fine',
+  'cold-brew':      'extra-coarse',
+  'iced-coffee':    'medium',
+  'iced-latte':     'fine',
+  'nitro-cold-brew':'extra-coarse',
+  'frappe':         'medium',
+  'affogato':       'fine',
+};
+
+// Default brew time (seconds) per drink type
+export const defaultBrewTimeByDrink: Record<string, number> = {
+  'drip':           300,
+  'pour-over':      210,
+  'espresso':       28,
+  'americano':      28,
+  'latte':          28,
+  'cappuccino':     28,
+  'flat-white':     28,
+  'cortado':        28,
+  'macchiato':      28,
+  'mocha':          28,
+  'cold-brew':      86400, // 24 hours
+  'iced-coffee':    300,
+  'iced-latte':     28,
+  'nitro-cold-brew':86400,
+  'frappe':         300,
+  'affogato':       28,
+};
+
+// Default water temperature (°F) per drink type
+export const defaultWaterTempByDrink: Record<string, number> = {
+  'drip':           200,
+  'pour-over':      202,
+  'espresso':       200,
+  'americano':      200,
+  'latte':          200,
+  'cappuccino':     200,
+  'flat-white':     200,
+  'cortado':        200,
+  'macchiato':      200,
+  'mocha':          200,
+  'cold-brew':      40,  // cold water
+  'iced-coffee':    200,
+  'iced-latte':     200,
+  'nitro-cold-brew':40,
+  'frappe':         200,
+  'affogato':       200,
+};

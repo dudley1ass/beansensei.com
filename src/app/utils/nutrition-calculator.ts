@@ -13,6 +13,130 @@ import {
   NutritionalInfo,
   drinkTypes
 } from '../data/coffee-data';
+import { grindSizes } from '../data/drinks';
+
+// ─── Brew-Science helpers ─────────────────────────────────────────────────────
+
+/**
+ * Grind size score: smaller grind → more surface area → higher extraction
+ * Returns a 0-100 relative extraction-surface score (100 = finest).
+ */
+function grindExtractionScore(grindId: string): number {
+  const g = grindSizes.find(g => g.id === grindId);
+  if (!g) return 50;
+  // Invert microns into a 0-100 score (extra-fine=150 → 100, extra-coarse=1400 → 0)
+  return Math.max(0, Math.min(100, 100 - ((g.microns - 150) / (1400 - 150)) * 100));
+}
+
+/**
+ * Water temperature score:
+ * Ideal extraction window: 195–205 °F.
+ * Below 195 → under-extracted (loses flavor & caffeine).
+ * Above 205 → over-extracted (bitter).
+ * Cold brew (≤50°F) is intentionally cold and gets its own path.
+ */
+function tempExtractionScore(tempF: number): { caffeine: number; flavor: number; bitterness: number } {
+  if (tempF <= 50) {
+    // Cold brew: slow cold extraction — low bitterness, moderate caffeine
+    return { caffeine: 55, flavor: 62, bitterness: 20 };
+  }
+  // Hot brewing
+  const ideal = 200; // center of ideal window
+  const deviation = Math.abs(tempF - ideal);
+  // Caffeine and flavor extraction peak near ideal, fall off with deviation
+  const extractEff = Math.max(20, 100 - (deviation / 20) * 40);
+  // Bitterness rises above 205°F (over-extraction) or is low below 195°F
+  const bitter = tempF > 205
+    ? Math.min(100, 30 + ((tempF - 205) / 5) * 25)
+    : tempF < 195
+    ? Math.max(0, 30 - ((195 - tempF) / 10) * 20)
+    : 30 + ((tempF - 195) / 10) * 15; // gentle rise in ideal range
+  return { caffeine: extractEff, flavor: extractEff, bitterness: Math.round(bitter) };
+}
+
+/**
+ * Brew time score:
+ * Each drink type has an ideal window; deviation penalises extraction or adds bitterness.
+ * Returns modifiers for caffeine (0-1.2), flavor (0-1.2), bitterness (0-100).
+ */
+function brewTimeScore(drinkId: string, brewTimeSec: number): { caffeineMulti: number; flavorMulti: number; bitterness: number } {
+  // Ideal brew time ranges per category (seconds)
+  const ranges: Record<string, [number, number]> = {
+    espresso: [20, 35],
+    milk:     [20, 35],
+    brewed:   [180, 360],
+    cold:     [57600, 115200], // 16-32 hours for cold brew; iced coffee ~brewed
+  };
+  const drinkType = drinkId;
+  let range: [number, number] = [180, 360];
+  if (['espresso','americano'].includes(drinkType)) range = ranges.espresso;
+  else if (['latte','cappuccino','flat-white','cortado','macchiato','mocha'].includes(drinkType)) range = ranges.milk;
+  else if (['iced-latte'].includes(drinkType)) range = ranges.espresso;
+  else if (['cold-brew','nitro-cold-brew'].includes(drinkType)) range = ranges.cold;
+
+  const [lo, hi] = range;
+  const mid = (lo + hi) / 2;
+
+  if (brewTimeSec < lo) {
+    // Under-extracted
+    const ratio = brewTimeSec / lo;
+    return { caffeineMulti: 0.6 + ratio * 0.4, flavorMulti: 0.5 + ratio * 0.5, bitterness: 10 };
+  }
+  if (brewTimeSec > hi) {
+    // Over-extracted
+    const excess = (brewTimeSec - hi) / hi;
+    return { caffeineMulti: Math.min(1.2, 1 + excess * 0.15), flavorMulti: Math.max(0.5, 1 - excess * 0.3), bitterness: Math.min(100, 45 + excess * 40) };
+  }
+  // In range — slight caffeine bonus near the end
+  const posInRange = (brewTimeSec - lo) / (hi - lo);
+  return { caffeineMulti: 1 + posInRange * 0.1, flavorMulti: 1 + (1 - Math.abs(posInRange - 0.5) * 2) * 0.1, bitterness: 20 + posInRange * 15 };
+}
+
+/**
+ * Roast bitterness contribution: light=10, medium=25, medium-dark=45, dark=65
+ */
+function roastBitterness(roastId: string): number {
+  const map: Record<string, number> = { light: 10, medium: 25, 'medium-dark': 45, dark: 65 };
+  return map[roastId] ?? 25;
+}
+
+/**
+ * Compute the three brew-science scores returned on NutritionalInfo.
+ * All three are 0-100.
+ */
+export function computeBrewScores(recipe: CoffeeRecipe): { flavorScore: number; bitternessScore: number; caffeineExtractScore: number } {
+  const grindId   = recipe.grindSize  || 'medium';
+  const tempF     = recipe.waterTemp  ?? 200;
+  const brewSec   = recipe.brewTime   ?? 28;
+  const roastId   = recipe.roast      || 'medium';
+
+  const gScore  = grindExtractionScore(grindId);    // 0-100
+  const tScores = tempExtractionScore(tempF);
+  const bScores = brewTimeScore(recipe.drinkType, brewSec);
+
+  // Caffeine extract efficiency: blend of grind, temp, time
+  const caffeineExtractScore = Math.round(
+    gScore * 0.35 + tScores.caffeine * 0.40 + bScores.caffeineMulti * 25 * 0.25
+  );
+
+  // Flavor score: high extraction = rich flavor but balance matters
+  const rawFlavor = (gScore * 0.30 + tScores.flavor * 0.40 + bScores.flavorMulti * 25 * 0.30);
+  const flavorScore = Math.round(Math.min(100, rawFlavor));
+
+  // Bitterness: roast base + over-temp penalty + over-time penalty + fine grind penalty
+  const grindBitterBonus = Math.max(0, (100 - gScore) < 30 ? (gScore - 70) * 0.4 : 0);
+  const rawBitterness = (roastBitterness(roastId) * 0.45) +
+                        (tScores.bitterness * 0.30) +
+                        (bScores.bitterness * 0.20) +
+                        grindBitterBonus;
+  const bitternessScore = Math.round(Math.min(100, Math.max(0, rawBitterness)));
+
+  return {
+    flavorScore:        Math.max(0, Math.min(100, flavorScore)),
+    bitternessScore,
+    caffeineExtractScore: Math.max(0, Math.min(100, caffeineExtractScore)),
+  };
+}
 
 export function calculateNutrition(recipe: CoffeeRecipe): NutritionalInfo {
   let calories = 0;
@@ -92,6 +216,12 @@ export function calculateNutrition(recipe: CoffeeRecipe): NutritionalInfo {
   }
   
   caffeine = Math.round(caffeine);
+
+  // Apply brew-science caffeine extraction modifier
+  const brewScores = computeBrewScores(recipe);
+  // caffeineExtractScore is 0-100; treat 75 as baseline (neutral)
+  const caffeineBrewMulti = 0.5 + (brewScores.caffeineExtractScore / 100) * 1.0; // range ~0.5–1.5
+  caffeine = Math.round(caffeine * caffeineBrewMulti);
 
   // Espresso base calories (minimal - about 3 per shot)
   if (category === 'brewed') {
@@ -187,5 +317,6 @@ export function calculateNutrition(recipe: CoffeeRecipe): NutritionalInfo {
     sugar: Math.round(sugar * 10) / 10, // Round to 1 decimal
     protein: Math.round(protein * 10) / 10,
     fat: Math.round(fat * 10) / 10,
+    ...computeBrewScores(recipe),
   };
 }

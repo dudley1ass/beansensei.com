@@ -8,16 +8,12 @@ import {
   milkOptions, 
   sweeteners, 
   flavorSyrups,
-  toppings 
+  toppings,
+  NutritionalInfo
 } from '../data/coffee-data';
+import { grindSizes } from '../data/drinks';
 
-export function generateRecipePDF(recipe: CoffeeRecipe, nutrition?: {
-  calories: number;
-  protein: number;
-  fat: number;
-  sugar: number;
-  caffeine: number;
-}) {
+export function generateRecipePDF(recipe: CoffeeRecipe, nutrition?: NutritionalInfo) {
   const pdf = new jsPDF();
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
@@ -156,6 +152,54 @@ export function generateRecipePDF(recipe: CoffeeRecipe, nutrition?: {
     });
     
     y += 8;
+  }
+
+  // ==================== BREW PARAMETERS ====================
+  if (recipe.grindSize || recipe.waterTemp || recipe.brewTime) {
+    pdf.setTextColor(dark[0], dark[1], dark[2]);
+    pdf.setFontSize(12);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('BREW PARAMETERS', 20, y);
+    y += 6;
+
+    const grind = grindSizes.find(g => g.id === (recipe.grindSize || 'medium'));
+    if (grind) {
+      pdf.setFontSize(9);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(dark[0], dark[1], dark[2]);
+      pdf.text('Grind Size:', 25, y);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(accent[0], accent[1], accent[2]);
+      pdf.text(`${grind.name} — ${grind.description}`, 55, y);
+      y += 6;
+    }
+
+    if (recipe.waterTemp !== undefined) {
+      pdf.setFontSize(9);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(dark[0], dark[1], dark[2]);
+      pdf.text('Water Temp:', 25, y);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(accent[0], accent[1], accent[2]);
+      const tempLabel = recipe.waterTemp <= 50 ? ' (Cold Brew)' : recipe.waterTemp < 195 ? ' (Under-ideal)' : recipe.waterTemp > 205 ? ' (Over-ideal)' : ' (Ideal range)';
+      pdf.text(`${recipe.waterTemp}°F${tempLabel}`, 55, y);
+      y += 6;
+    }
+
+    if (recipe.brewTime !== undefined) {
+      pdf.setFontSize(9);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(dark[0], dark[1], dark[2]);
+      pdf.text('Brew Time:', 25, y);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(accent[0], accent[1], accent[2]);
+      const bt = recipe.brewTime;
+      const brewTimeStr = bt >= 3600 ? `${Math.round(bt / 3600)}h` : bt >= 60 ? `${Math.floor(bt / 60)}m ${bt % 60}s` : `${bt}s`;
+      pdf.text(brewTimeStr, 55, y);
+      y += 6;
+    }
+
+    y += 6;
   }
 
   // ==================== BUILD DETAILS ====================
@@ -337,7 +381,42 @@ export function generateRecipePDF(recipe: CoffeeRecipe, nutrition?: {
     });
     
     y += 15;
-    
+
+    // ── Brew Science Scores ──
+    if (nutrition.flavorScore !== undefined) {
+      pdf.setTextColor(dark[0], dark[1], dark[2]);
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('BREW SCIENCE', 20, y);
+      y += 6;
+
+      pdf.setDrawColor(dark[0], dark[1], dark[2]);
+      pdf.setLineWidth(0.5);
+      pdf.rect(20, y, pageWidth - 40, 36);
+      y += 6;
+
+      const brewData = [
+        { label: 'Flavor Richness', value: nutrition.flavorScore, unit: '/100', color: nutrition.flavorScore >= 70 ? [180, 120, 0] : [100, 100, 100] },
+        { label: 'Bitterness', value: nutrition.bitternessScore, unit: '/100', color: nutrition.bitternessScore >= 70 ? [180, 40, 40] : nutrition.bitternessScore >= 45 ? [180, 120, 0] : [34, 120, 50] },
+        { label: 'Caffeine Extraction', value: nutrition.caffeineExtractScore, unit: '/100', color: nutrition.caffeineExtractScore >= 70 ? [34, 120, 50] : [100, 100, 100] },
+      ];
+
+      brewData.forEach((item) => {
+        pdf.setFontSize(9);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(dark[0], dark[1], dark[2]);
+        pdf.text(item.label, 27, y);
+
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor((item.color as number[])[0], (item.color as number[])[1], (item.color as number[])[2]);
+        pdf.text(String(item.value) + item.unit, pageWidth - 27, y, { align: 'right' });
+        y += 10;
+      });
+
+      y += 5;
+    }
+
     // Warnings
     if (nutrition.caffeine > 400) {
       pdf.setFillColor(254, 226, 226);

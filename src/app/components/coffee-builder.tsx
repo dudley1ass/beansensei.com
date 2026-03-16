@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router';
-import { Download, Sparkles, Coffee, Plus } from 'lucide-react';
+import { Download, Sparkles, Coffee, Plus, Thermometer, Timer, Layers } from 'lucide-react';
 import { 
   CoffeeRecipe, 
   presetBlends,
@@ -17,6 +17,7 @@ import {
   toppings,
   CustomBlend
 } from '../data/coffee-data';
+import { grindSizes, defaultGrindByDrink, defaultBrewTimeByDrink, defaultWaterTempByDrink } from '../data/drinks';
 import { BeanBlendBuilder } from './bean-blend-builder';
 import { NutritionPanel } from './nutrition-panel';
 import { OrderSummary } from './order-summary';
@@ -48,6 +49,11 @@ export function CoffeeBuilder({ initialRecipe }: CoffeeBuilderProps) {
   const [selectedToppings, setSelectedToppings] = useState<string[]>(initialRecipe?.toppings || []);
   const [currentTopping, setCurrentTopping] = useState('none');
   const [description, setDescription] = useState(initialRecipe?.description || '');
+
+  // Brew parameters
+  const [grindSize, setGrindSize] = useState(initialRecipe?.grindSize || 'medium');
+  const [brewTime, setBrewTime] = useState(initialRecipe?.brewTime ?? 28);
+  const [waterTemp, setWaterTemp] = useState(initialRecipe?.waterTemp ?? 200);
 
   const selectedDrinkType = drinkTypes.find(d => d.id === drinkType);
 
@@ -93,6 +99,11 @@ export function CoffeeBuilder({ initialRecipe }: CoffeeBuilderProps) {
         setEspressoShots(0);
       }
     }
+
+    // Auto-set brew parameters based on drink type
+    if (defaultGrindByDrink[drinkType]) setGrindSize(defaultGrindByDrink[drinkType]);
+    if (defaultBrewTimeByDrink[drinkType] !== undefined) setBrewTime(defaultBrewTimeByDrink[drinkType]);
+    if (defaultWaterTempByDrink[drinkType] !== undefined) setWaterTemp(defaultWaterTempByDrink[drinkType]);
   }, [drinkType]);
 
   // Load saved custom blends from localStorage on mount
@@ -168,6 +179,9 @@ export function CoffeeBuilder({ initialRecipe }: CoffeeBuilderProps) {
       syrupAmount: flavorSyrup !== 'none' ? syrupAmount : undefined,
       toppings: selectedToppings.length > 0 ? selectedToppings : undefined,
       description: description || undefined,
+      grindSize,
+      brewTime,
+      waterTemp,
     };
     
     // Calculate nutrition for PDF
@@ -203,6 +217,9 @@ export function CoffeeBuilder({ initialRecipe }: CoffeeBuilderProps) {
     flavorSyrup: flavorSyrup !== 'none' ? flavorSyrup : undefined,
     syrupAmount: flavorSyrup !== 'none' ? syrupAmount : undefined,
     toppings: selectedToppings.length > 0 ? selectedToppings : undefined,
+    grindSize,
+    brewTime,
+    waterTemp,
   };
 
   // Function to generate flavor profile for a blend
@@ -552,6 +569,123 @@ export function CoffeeBuilder({ initialRecipe }: CoffeeBuilderProps) {
                     <option key={r.id} value={r.id}>{r.name} - {r.description}</option>
                   ))}
                 </select>
+              </div>
+
+              {/* Step 3.5: Brew Parameters */}
+              <div className="border-l-4 border-amber-500 pl-4">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="bg-amber-600 text-white rounded-full size-7 flex items-center justify-center text-sm font-bold flex-shrink-0">
+                    ⚗
+                  </div>
+                  <label className="text-base font-bold text-amber-600 uppercase tracking-wide">
+                    Brew Parameters
+                  </label>
+                </div>
+                <p className="text-xs text-gray-500 italic mb-4">
+                  These variables affect flavor richness, bitterness, and caffeine extraction — adjust to dial in your perfect cup.
+                </p>
+
+                {/* Grind Size */}
+                <div className="mb-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Layers className="size-4 text-amber-600" />
+                    <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Grind Size</p>
+                  </div>
+                  <select
+                    value={grindSize}
+                    onChange={(e) => setGrindSize(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm"
+                  >
+                    {grindSizes.map((g) => (
+                      <option key={g.id} value={g.id}>{g.name} — {g.description}</option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-gray-500 mt-1 italic">
+                    Finer grind → more surface area → stronger extraction & more bitterness risk
+                  </p>
+                </div>
+
+                {/* Water Temperature */}
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Thermometer className="size-4 text-amber-600" />
+                      <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Water Temperature</p>
+                    </div>
+                    <span className="text-sm font-bold text-amber-700">{waterTemp}°F</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={35}
+                    max={212}
+                    value={waterTemp}
+                    onChange={(e) => setWaterTemp(Number(e.target.value))}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>35°F (Cold)</span>
+                    <span className="text-green-600 font-medium">195–205°F Ideal</span>
+                    <span>212°F (Boiling)</span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1 italic">
+                    Below 195°F → under-extracted (sour/weak). Above 205°F → over-extracted (bitter). Cold = cold brew.
+                  </p>
+                </div>
+
+                {/* Brew Time */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Timer className="size-4 text-amber-600" />
+                      <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Brew Time</p>
+                    </div>
+                    <span className="text-sm font-bold text-amber-700">
+                      {brewTime >= 3600
+                        ? `${Math.round(brewTime / 3600)}h`
+                        : brewTime >= 60
+                        ? `${Math.floor(brewTime / 60)}m ${brewTime % 60}s`
+                        : `${brewTime}s`}
+                    </span>
+                  </div>
+                  {/* Two ranges: fine control (0-600s) and coarse (hours for cold brew) */}
+                  {waterTemp <= 50 ? (
+                    <>
+                      <input
+                        type="range"
+                        min={3600}
+                        max={172800}
+                        step={3600}
+                        value={brewTime}
+                        onChange={(e) => setBrewTime(Number(e.target.value))}
+                        className="w-full"
+                      />
+                      <div className="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>1 hour</span>
+                        <span className="text-green-600 font-medium">16–24h ideal</span>
+                        <span>48 hours</span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <input
+                        type="range"
+                        min={5}
+                        max={600}
+                        step={1}
+                        value={Math.min(brewTime, 600)}
+                        onChange={(e) => setBrewTime(Number(e.target.value))}
+                        className="w-full"
+                      />
+                      <div className="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>5 sec</span>
+                        <span>10 min</span>
+                      </div>
+                    </>
+                  )}
+                  <p className="text-xs text-gray-500 mt-1 italic">
+                    Espresso: 20–35s ideal. Drip: 3–6 min. French press: 4 min. Cold brew: 12–24h.
+                  </p>
+                </div>
               </div>
 
               {/* Step 4: Espresso Shots */}

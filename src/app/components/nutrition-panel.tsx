@@ -1,4 +1,4 @@
-import { Droplet, Zap, Flame, Activity } from 'lucide-react';
+import { Droplet, Zap, Flame, Activity, Gauge, FlaskConical, Star } from 'lucide-react';
 import { generateDrinkInsights } from '../utils/drink-insights';
 import { calculateNutrition } from '../utils/nutrition-calculator';
 import { CoffeeRecipe } from '../data/coffee-data';
@@ -164,6 +164,87 @@ export function NutritionPanel({ recipe }: NutritionPanelProps) {
             />
           </div>
           <div className="text-xs text-purple-600 mt-1">Daily intake: 70g</div>
+        </div>
+      </div>
+
+      {/* Brew Science Scores */}
+      <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+        <h4 className="text-sm font-semibold text-amber-900 mb-3 flex items-center gap-2">
+          <FlaskConical className="size-4" />
+          Brew Science
+        </h4>
+        <div className="space-y-3">
+          {/* Flavor Score */}
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-1.5">
+                <Star className="size-3.5 text-amber-600" />
+                <span className="text-xs font-semibold text-gray-700">Flavor Richness</span>
+              </div>
+              <span className="text-xs font-bold text-amber-800">
+                {nutrition.flavorScore}/100
+                {' '}
+                <span className="font-normal text-gray-500">
+                  {nutrition.flavorScore >= 80 ? '🌟 Exceptional' : nutrition.flavorScore >= 60 ? '✅ Rich' : nutrition.flavorScore >= 40 ? '⚠️ Moderate' : '🔻 Weak'}
+                </span>
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-300 ${nutrition.flavorScore >= 70 ? 'bg-amber-500' : nutrition.flavorScore >= 45 ? 'bg-yellow-400' : 'bg-gray-400'}`}
+                style={{ width: `${nutrition.flavorScore}%` }}
+              />
+            </div>
+            <p className="text-xs text-gray-500 mt-0.5">Grind size × water temp × brew time → extraction richness</p>
+          </div>
+
+          {/* Bitterness Score */}
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-1.5">
+                <Gauge className="size-3.5 text-amber-600" />
+                <span className="text-xs font-semibold text-gray-700">Bitterness</span>
+              </div>
+              <span className="text-xs font-bold text-amber-800">
+                {nutrition.bitternessScore}/100
+                {' '}
+                <span className="font-normal text-gray-500">
+                  {nutrition.bitternessScore >= 75 ? '🔥 Very Bitter' : nutrition.bitternessScore >= 55 ? '☕ Bold' : nutrition.bitternessScore >= 35 ? '✅ Balanced' : '🍋 Mild'}
+                </span>
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-300 ${nutrition.bitternessScore >= 70 ? 'bg-red-500' : nutrition.bitternessScore >= 45 ? 'bg-orange-400' : 'bg-green-500'}`}
+                style={{ width: `${nutrition.bitternessScore}%` }}
+              />
+            </div>
+            <p className="text-xs text-gray-500 mt-0.5">Roast level + over-temp/over-time = bitterness compounds</p>
+          </div>
+
+          {/* Caffeine Extract Efficiency */}
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-1.5">
+                <Zap className="size-3.5 text-amber-600" />
+                <span className="text-xs font-semibold text-gray-700">Caffeine Extraction</span>
+              </div>
+              <span className="text-xs font-bold text-amber-800">
+                {nutrition.caffeineExtractScore}/100
+                {' '}
+                <span className="font-normal text-gray-500">
+                  {nutrition.caffeineExtractScore >= 75 ? '⚡ Max Power' : nutrition.caffeineExtractScore >= 55 ? '✅ Efficient' : nutrition.caffeineExtractScore >= 35 ? '⚠️ Partial' : '😴 Low Yield'}
+                </span>
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-300 ${nutrition.caffeineExtractScore >= 70 ? 'bg-green-600' : nutrition.caffeineExtractScore >= 45 ? 'bg-blue-400' : 'bg-gray-400'}`}
+                style={{ width: `${nutrition.caffeineExtractScore}%` }}
+              />
+            </div>
+            <p className="text-xs text-gray-500 mt-0.5">Affects actual caffeine mg above — grind + temp + time efficiency</p>
+          </div>
         </div>
       </div>
 

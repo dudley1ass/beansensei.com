@@ -25,6 +25,10 @@ export interface CoffeeRecipe {
   syrupAmount?: string;
   toppings?: string[]; // Array of topping IDs
   description?: string;
+  // Brew parameters
+  grindSize?: string;   // e.g. 'extra-fine', 'fine', 'medium-fine', 'medium', 'medium-coarse', 'coarse', 'extra-coarse'
+  brewTime?: number;    // seconds
+  waterTemp?: number;   // Fahrenheit
 }
 
 export interface NutritionalInfo {
@@ -33,6 +37,10 @@ export interface NutritionalInfo {
   sugar: number; // g
   protein: number; // g
   fat: number; // g
+  // Brew-science derived scores (0-100)
+  flavorScore: number;
+  bitternessScore: number;
+  caffeineExtractScore: number; // brew-efficiency modifier (0-100)
 }
 
 // Bean types with nutritional info (per shot of espresso ~18g ground coffee)
