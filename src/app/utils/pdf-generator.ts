@@ -12,6 +12,7 @@ import {
   NutritionalInfo
 } from '../data/coffee-data';
 import { grindSizes } from '../data/drinks';
+import { computeSCAScorecard } from './sca-scorer';
 
 export function generateRecipePDF(recipe: CoffeeRecipe, nutrition?: NutritionalInfo) {
   const pdf = new jsPDF();
@@ -438,6 +439,87 @@ export function generateRecipePDF(recipe: CoffeeRecipe, nutrition?: NutritionalI
       y += 10;
     }
   }
+
+  // ==================== SCA SCORECARD ====================
+  const sca = computeSCAScorecard(recipe);
+
+  // Check if we need a new page
+  if (y > pageHeight - 100) {
+    pdf.addPage();
+    y = 20;
+  }
+
+  pdf.setTextColor(dark[0], dark[1], dark[2]);
+  pdf.setFontSize(12);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('SCA COFFEE SCORECARD', 20, y);
+  y += 6;
+
+  // Score hero box
+  const scaGradeColors: Record<string, [number, number, number]> = {
+    'Outstanding': [124, 58, 237],
+    'Excellent':   [37, 99, 235],
+    'Specialty':   [22, 163, 74],
+    'Commercial':  [202, 138, 4],
+    'Below Grade': [220, 38, 38],
+  };
+  const scaRgb = scaGradeColors[sca.grade] ?? [100, 100, 100];
+
+  pdf.setFillColor(scaRgb[0], scaRgb[1], scaRgb[2]);
+  pdf.rect(20, y, pageWidth - 40, 16, 'F');
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFontSize(13);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text(`${sca.gradeEmoji} ${sca.totalScore} / 100 — ${sca.grade}`, 25, y + 10);
+  y += 20;
+
+  pdf.setFontSize(8);
+  pdf.setFont('helvetica', 'italic');
+  pdf.setTextColor(gray[0], gray[1], gray[2]);
+  pdf.text(sca.headline, 20, y);
+  y += 7;
+
+  // Attribute rows
+  sca.attributes.forEach(attr => {
+    const barWidth = ((attr.score - 6) / 4) * (pageWidth - 60);
+    pdf.setFontSize(8);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(dark[0], dark[1], dark[2]);
+    pdf.text(`${attr.emoji} ${attr.name}`, 20, y);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(gray[0], gray[1], gray[2]);
+    pdf.text(attr.descriptor, 65, y);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(scaRgb[0], scaRgb[1], scaRgb[2]);
+    pdf.text(attr.score.toFixed(1), pageWidth - 20, y, { align: 'right' });
+
+    // Mini bar
+    pdf.setFillColor(230, 230, 230);
+    pdf.rect(20, y + 1, pageWidth - 40, 2, 'F');
+    pdf.setFillColor(scaRgb[0], scaRgb[1], scaRgb[2]);
+    pdf.rect(20, y + 1, barWidth, 2, 'F');
+    y += 8;
+  });
+
+  y += 4;
+
+  // Recommendations
+  if (sca.recommendations.length > 0) {
+    pdf.setFontSize(9);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(dark[0], dark[1], dark[2]);
+    pdf.text('Q Grader Tips:', 20, y);
+    y += 5;
+    sca.recommendations.forEach((rec, i) => {
+      pdf.setFontSize(8);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(gray[0], gray[1], gray[2]);
+      const lines = pdf.splitTextToSize(`${i + 1}. ${rec}`, pageWidth - 40);
+      lines.forEach((line: string) => { pdf.text(line, 22, y); y += 4; });
+    });
+  }
+
+  y += 8;
 
   // ==================== FOOTER ====================
   const footerY = pageHeight - 15;

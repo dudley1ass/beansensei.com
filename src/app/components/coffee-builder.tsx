@@ -21,6 +21,7 @@ import { grindSizes, defaultGrindByDrink, defaultBrewTimeByDrink, defaultWaterTe
 import { BeanBlendBuilder } from './bean-blend-builder';
 import { NutritionPanel } from './nutrition-panel';
 import { OrderSummary } from './order-summary';
+import { SCAScoreCard } from './sca-scorecard';
 import { generateRecipePDF } from '../utils/pdf-generator';
 import { calculateNutrition } from '../utils/nutrition-calculator';
 import { toast } from 'sonner';
@@ -1198,6 +1199,7 @@ export function CoffeeBuilder({ initialRecipe }: CoffeeBuilderProps) {
         {/* Right Column - Order Summary & Nutrition */}
         <div className="lg:sticky lg:top-4 h-fit space-y-6">
           <OrderSummary recipe={previewRecipe} />
+          <SCAScoreCard recipe={previewRecipe} />
           <NutritionPanel recipe={previewRecipe} />
         </div>
       </div>
