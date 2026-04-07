@@ -1,9 +1,12 @@
 import { CoffeeRecipe } from '../data/coffee-data';
 import { computeSCAScorecard, SCAAttribute } from '../utils/sca-scorer';
-import { Award } from 'lucide-react';
+import { getSCAQuickWinHints } from '../utils/sca-quick-wins';
+import { Award, Sparkles } from 'lucide-react';
 
 interface SCAScoreCardProps {
   recipe: CoffeeRecipe;
+  /** Shown under the hero — “what just changed” from the last tweak */
+  changeHints?: string[];
 }
 
 function AttributeRow({ attr }: { attr: SCAAttribute }) {
@@ -39,30 +42,62 @@ function AttributeRow({ attr }: { attr: SCAAttribute }) {
   );
 }
 
-export function SCAScoreCard({ recipe }: SCAScoreCardProps) {
+export function SCAScoreCard({ recipe, changeHints = [] }: SCAScoreCardProps) {
   const scorecard = computeSCAScorecard(recipe);
+  const quickWins = getSCAQuickWinHints(recipe, 2);
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6">
+    <div className="bg-white rounded-lg border-2 border-coffee-300 shadow-lg p-6">
       {/* Header */}
-      <div className="flex items-center gap-2 mb-4">
-        <Award className="size-5 text-coffee-700" />
-        <h3 className="text-lg font-semibold text-gray-900">SCA Coffee Score</h3>
-        <span className="ml-auto text-xs text-gray-400">Q Grader Protocol</span>
+      <div className="flex items-center gap-2 mb-2">
+        <Sparkles className="size-5 text-amber-500 fill-amber-200" />
+        <h3 className="text-lg font-bold text-gray-900">Your Coffee Score</h3>
+        <Award className="size-4 text-coffee-700 opacity-60 ml-1" />
+        <span className="ml-auto text-xs text-gray-400">SCA-style</span>
       </div>
 
       {/* Score Hero */}
-      <div className={`flex items-center justify-between p-4 rounded-xl border-2 mb-5 ${scorecard.gradeColor}`}>
+      <div className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 rounded-xl border-2 mb-4 ${scorecard.gradeColor}`}>
         <div>
-          <div className="text-4xl font-black tracking-tight">{scorecard.totalScore}</div>
-          <div className="text-xs font-medium opacity-70">out of 100</div>
+          <p className="text-base sm:text-lg font-black tracking-tight">
+            ⭐ Your Coffee Score:{' '}
+            <span className="text-3xl sm:text-4xl tabular-nums">{scorecard.totalScore}</span>
+            <span className="text-base sm:text-lg font-bold"> ({scorecard.grade} Grade)</span>
+          </p>
+          <p className="text-xs font-medium opacity-80 mt-2">{scorecard.headline} — out of 100.</p>
         </div>
-        <div className="text-right">
-          <div className="text-2xl mb-0.5">{scorecard.gradeEmoji}</div>
-          <div className="text-sm font-bold">{scorecard.grade}</div>
-          <div className="text-xs opacity-80 max-w-36">{scorecard.headline}</div>
+        <div className="text-left sm:text-right flex-shrink-0">
+          <div className="text-3xl mb-0.5">{scorecard.gradeEmoji}</div>
+          <div className="text-xs font-medium opacity-80 max-w-[11rem] sm:ml-auto">
+            Small dial moves → big flavor changes. Chase the next tier.
+          </div>
         </div>
       </div>
+
+      {changeHints.length > 0 && (
+        <div className="mb-4 rounded-lg bg-gradient-to-r from-violet-50 to-amber-50 border border-violet-200 px-3 py-2">
+          <p className="text-xs font-bold text-violet-900 uppercase tracking-wide mb-1">What changed</p>
+          <div className="flex flex-wrap gap-2">
+            {changeHints.map((h) => (
+              <span key={h} className="text-xs font-semibold text-violet-900 bg-white/80 border border-violet-100 rounded-full px-2.5 py-1">
+                {h}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {quickWins.length > 0 && (
+        <div className="mb-5 space-y-1.5">
+          <p className="text-xs font-bold text-amber-800 uppercase tracking-wide">Level up next</p>
+          {quickWins.map((hint) => (
+            <p key={hint} className="text-sm text-amber-950 font-medium flex gap-2">
+              <span aria-hidden>👉</span>
+              {hint}
+            </p>
+          ))}
+        </div>
+      )}
 
       {/* SCA Scale reference */}
       <div className="flex gap-1 mb-5 text-center">

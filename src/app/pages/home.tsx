@@ -20,7 +20,7 @@ export function Home() {
           </div>
           <div>
             <h2 className="text-2xl font-black text-coffee-700 leading-tight">Recipe Builder</h2>
-            <p className="text-sm text-gray-500">Customize every variable — results update live on the right</p>
+            <p className="text-sm text-gray-500">Step 1: make the drink. Live SCA score & flavor results update on the right.</p>
           </div>
           <div className="ml-auto hidden sm:flex items-center gap-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-3 py-1.5 font-medium">
             <ArrowDown className="size-3.5 animate-bounce" />
@@ -42,9 +42,10 @@ export function Home() {
       >
         <div className="max-w-3xl mx-auto px-6 text-center">
           <div className="text-3xl mb-2">☕</div>
-          <h3 className="text-2xl font-black text-white mb-2">Want a fully custom bean blend?</h3>
+          <p className="text-xs font-bold text-amber-200/80 uppercase tracking-widest mb-2">Step 2 — optional</p>
+          <h3 className="text-2xl font-black text-white mb-2">Optimize your beans (blend builder)</h3>
           <p className="text-amber-100/70 text-sm mb-5">
-            Mix from 110+ single-origin varieties, set percentages, save and reuse across recipes.
+            Best after you like your drink style — mix 110+ single-origin varieties and reuse across recipes.
           </p>
           <Link
             to="/blend-builder"

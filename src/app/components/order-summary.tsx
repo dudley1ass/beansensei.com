@@ -1,6 +1,7 @@
 import { Coffee, Sparkles } from 'lucide-react';
 import { CoffeeRecipe, presetBlends, baseBeans, roastLevels, drinkTypes, milkOptions, milkAmounts, sweeteners, sweetenerAmounts, flavorSyrups, syrupAmounts, toppings } from '../data/coffee-data';
 import { generateCompleteTasteProfile } from '../utils/taste-profile';
+import { describeDrinkOutcomes } from '../utils/drink-outcomes';
 
 interface OrderSummaryProps {
   recipe: CoffeeRecipe;
@@ -15,7 +16,6 @@ export function OrderSummary({ recipe }: OrderSummaryProps) {
   const sweetenerAmt = sweetenerAmounts.find(a => a.id === recipe.sweetenerAmount);
   const syrup = flavorSyrups.find(f => f.id === recipe.flavorSyrup);
   const syrupAmt = syrupAmounts.find(a => a.id === recipe.syrupAmount);
-  const topping = toppings.find(t => t.id === recipe.toppings?.[0]);
 
   // Get bean blend information
   let beanInfo = '';
@@ -27,13 +27,16 @@ export function OrderSummary({ recipe }: OrderSummaryProps) {
   }
 
   return (
-    <div className="bg-white rounded-lg border-2 border-coffee-300 shadow-lg p-6 hidden lg:block">
-      <div className="flex items-center gap-2 mb-4 pb-4 border-b-2 border-coffee-200">
-        <Coffee className="size-6 text-coffee-700" />
-        <h3 className="text-xl font-semibold text-gray-900">Your Order</h3>
+    <div className="bg-white rounded-lg border-2 border-coffee-300 shadow-lg p-4 sm:p-5 lg:p-6 scroll-mt-4">
+      <div className="flex items-center gap-2 mb-3 sm:mb-4 pb-3 sm:pb-4 border-b-2 border-coffee-200">
+        <Coffee className="size-5 sm:size-6 text-coffee-700 shrink-0" />
+        <div>
+          <h3 className="text-lg sm:text-xl font-semibold text-gray-900 leading-tight">Your Order</h3>
+          <p className="text-xs text-gray-500 mt-0.5 lg:hidden">How it’ll taste — scroll up to tweak</p>
+        </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         {/* Recipe Name */}
         {recipe.name && recipe.name !== 'Preview' && (
           <div className="bg-coffee-100 rounded-md p-3 -mt-1 mb-4">
@@ -43,12 +46,12 @@ export function OrderSummary({ recipe }: OrderSummaryProps) {
 
         {/* Taste Profile Section */}
         {(recipe.customBlend || recipe.beanBlend) && (
-          <div className="bg-gradient-to-br from-coffee-50 to-coffee-100 rounded-lg p-4 mb-4 border border-coffee-200">
+          <div className="bg-gradient-to-br from-coffee-50 to-coffee-100 rounded-lg p-3 sm:p-4 mb-3 sm:mb-4 border border-coffee-200">
             <div className="flex items-center gap-2 mb-2">
               <Sparkles className="size-4 text-coffee-700" />
-              <h4 className="text-sm font-bold text-coffee-700 uppercase tracking-wide">Complete Taste Profile</h4>
+              <h4 className="text-sm font-bold text-coffee-700 uppercase tracking-wide">Flavor profile</h4>
             </div>
-            <p className="text-sm text-coffee-800 leading-relaxed">
+            <p className="text-xs sm:text-sm text-coffee-800 leading-relaxed max-h-36 overflow-y-auto sm:max-h-none sm:overflow-visible pr-0.5">
               {generateCompleteTasteProfile(recipe)}
             </p>
             {roast && (
@@ -68,7 +71,10 @@ export function OrderSummary({ recipe }: OrderSummaryProps) {
             <div className="flex-1">
               <p className="text-xs font-bold text-coffee-700 uppercase tracking-wide">Start Here - Drink Type</p>
               <p className="text-sm font-medium text-gray-900 mt-1">{drinkType?.name}</p>
-              <p className="text-xs text-gray-600">{drinkType?.ratio}</p>
+              <p className="text-xs font-semibold text-amber-900 bg-amber-50 border border-amber-100 rounded-md px-2 py-1.5 mt-2 leading-snug">
+                → {describeDrinkOutcomes(recipe)}
+              </p>
+              <p className="text-xs text-gray-500 mt-1.5">Technical ratio: {drinkType?.ratio}</p>
             </div>
           </div>
         </div>

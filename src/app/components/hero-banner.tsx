@@ -165,7 +165,7 @@ export function HeroBanner() {
                 textShadow: '0 2px 20px rgba(0,0,0,0.4)',
               }}
             >
-              Master the Art of
+              Fix Your Coffee in
               <span
                 className="block"
                 style={{
@@ -175,7 +175,7 @@ export function HeroBanner() {
                   backgroundClip: 'text',
                 }}
               >
-                Perfect Coffee ☕
+                30 Seconds ☕
               </span>
             </h1>
             <p
@@ -185,8 +185,7 @@ export function HeroBanner() {
                 animation: visible ? 'fadeSlideUp 0.65s 0.22s cubic-bezier(.22,.68,0,1.2) forwards' : 'none',
               }}
             >
-              Build custom recipes from 110+ bean varieties. Get SCA Q Grader scoring, brew science 
-              analysis, and full nutritional data — all in one tool used by home baristas and coffee professionals.
+              Adjust grind, temp, and ratios — see instant SCA score and flavor readouts. Start from a goal (latte, stronger, smoother, less bitter) or go full barista in Advanced mode.
             </p>
           </div>
 
@@ -212,7 +211,7 @@ export function HeroBanner() {
               onClick={() => navigate('/blend-builder')}
               className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-semibold text-amber-200 text-base border border-amber-400/30 bg-white/5 backdrop-blur-sm transition-all duration-200 hover:bg-white/10 hover:scale-105 active:scale-95"
             >
-              🫘 Create Custom Bean Blend
+              🫘 Bean blends — after your drink
             </button>
           </div>
 

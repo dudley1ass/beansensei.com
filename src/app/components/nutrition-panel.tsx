@@ -5,9 +5,11 @@ import { CoffeeRecipe } from '../data/coffee-data';
 
 interface NutritionPanelProps {
   recipe: CoffeeRecipe;
+  /** Smaller card — nutrition is secondary to flavor & SCA score */
+  compact?: boolean;
 }
 
-export function NutritionPanel({ recipe }: NutritionPanelProps) {
+export function NutritionPanel({ recipe, compact }: NutritionPanelProps) {
   // Calculate nutrition from recipe
   const nutrition = calculateNutrition(recipe);
   
@@ -81,6 +83,28 @@ export function NutritionPanel({ recipe }: NutritionPanelProps) {
 
   const caffeineLevel = getCaffeineLevel(nutrition.caffeine);
   const sugarLevel = getSugarLevel(nutrition.sugar);
+
+  if (compact) {
+    return (
+      <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <Activity className="size-4 text-coffee-600" />
+          <h3 className="text-sm font-semibold text-gray-800">Nutrition snapshot</h3>
+        </div>
+        <div className="grid grid-cols-2 gap-2 text-xs">
+          <div className={`rounded-md border p-2 ${caffeineLevel.color}`}>
+            <span className="font-medium uppercase text-[10px]">Caffeine</span>
+            <div className="text-lg font-bold">{nutrition.caffeine} mg</div>
+          </div>
+          <div className={`rounded-md border p-2 ${sugarLevel.color}`}>
+            <span className="font-medium uppercase text-[10px]">Sugar / Cal</span>
+            <div className="text-lg font-bold">{nutrition.sugar}g <span className="text-sm font-semibold opacity-80">/ {nutrition.calories}</span></div>
+          </div>
+        </div>
+        <p className="text-[10px] text-gray-500 mt-2">Estimates only. Taste & extraction scores above matter more for dialing in flavor.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-6">

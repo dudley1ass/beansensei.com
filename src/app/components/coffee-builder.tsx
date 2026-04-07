@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router';
 import { Download, Sparkles, Coffee, Plus, Thermometer, Timer, Layers } from 'lucide-react';
 import { 
@@ -24,6 +24,7 @@ import { OrderSummary } from './order-summary';
 import { SCAScoreCard } from './sca-scorecard';
 import { generateRecipePDF } from '../utils/pdf-generator';
 import { calculateNutrition } from '../utils/nutrition-calculator';
+import { sensorySnapshot, sensoryDiffLabels } from '../utils/sensory-feedback';
 import { toast } from 'sonner';
 
 interface CoffeeBuilderProps {
@@ -33,6 +34,7 @@ interface CoffeeBuilderProps {
 export function CoffeeBuilder({ initialRecipe }: CoffeeBuilderProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  const skipDrinkTypeDefaultsRef = useRef(false);
   const [name, setName] = useState(initialRecipe?.name || '');
   const [useCustomBlend, setUseCustomBlend] = useState(!!initialRecipe?.customBlend);
   const [customBlend, setCustomBlend] = useState<CustomBlend | undefined>(initialRecipe?.customBlend);
@@ -56,10 +58,22 @@ export function CoffeeBuilder({ initialRecipe }: CoffeeBuilderProps) {
   const [brewTime, setBrewTime] = useState(initialRecipe?.brewTime ?? 28);
   const [waterTemp, setWaterTemp] = useState(initialRecipe?.waterTemp ?? 200);
 
+  const [brewUiMode, setBrewUiMode] = useState<'simple' | 'advanced'>('simple');
+  const [simpleStrength, setSimpleStrength] = useState(40);
+  const [simpleFlavor, setSimpleFlavor] = useState(50);
+
+  const [sensoryChangeHints, setSensoryChangeHints] = useState<string[]>([]);
+  const prevSensoryRef = useRef<ReturnType<typeof sensorySnapshot> | null>(null);
+  const [blendLabOpen, setBlendLabOpen] = useState(false);
+
   const selectedDrinkType = drinkTypes.find(d => d.id === drinkType);
 
   // Auto-set milk when milk-based drink is selected
   useEffect(() => {
+    if (skipDrinkTypeDefaultsRef.current) {
+      skipDrinkTypeDefaultsRef.current = false;
+      return;
+    }
     const drinkTypeObj = drinkTypes.find(d => d.id === drinkType);
     if (drinkTypeObj && drinkTypeObj.category === 'milk' && milk === 'none') {
       // Auto-set to whole milk for milk-based drinks
@@ -163,6 +177,113 @@ export function CoffeeBuilder({ initialRecipe }: CoffeeBuilderProps) {
     setUseCustomBlend(true);
   };
 
+  const grindRelativeToDrinkDefault = (drinkId: string, steps: number) => {
+    const defId = defaultGrindByDrink[drinkId] ?? 'medium';
+    const i = grindSizes.findIndex((g) => g.id === defId);
+    const base = i >= 0 ? i : 3;
+    const n = Math.max(0, Math.min(grindSizes.length - 1, base + steps));
+    return grindSizes[n].id;
+  };
+
+  type QuickStartId = 'better-latte' | 'stronger' | 'smoother' | 'fix-bitter';
+
+  const applyQuickStart = (goal: QuickStartId) => {
+    if (goal === 'better-latte') {
+      skipDrinkTypeDefaultsRef.current = true;
+      setDrinkType('latte');
+      setMilk('whole');
+      setMilkAmount('8oz');
+      setRoast('medium');
+      setBeanBlend('espresso');
+      setUseCustomBlend(false);
+      setEspressoShots(2);
+      setGrindSize('fine');
+      setWaterTemp(200);
+      setBrewTime(28);
+    } else if (goal === 'stronger') {
+      const cat = drinkTypes.find((d) => d.id === drinkType)?.category;
+      if (cat === 'brewed') {
+        setBrewTime(Math.min(420, (brewTime || 300) + 50));
+      } else if (['cold-brew', 'nitro-cold-brew'].includes(drinkType)) {
+        setBrewTime(Math.min(115200, (brewTime || 86400) + 7200));
+      } else {
+        setEspressoShots(Math.min(10, (espressoShots || 2) + 1));
+        setGrindSize(grindRelativeToDrinkDefault(drinkType, 1));
+        setWaterTemp(Math.min(205, (waterTemp || 200) + 1));
+      }
+    } else if (goal === 'smoother') {
+      setGrindSize(grindRelativeToDrinkDefault(drinkType, -1));
+      setWaterTemp(Math.max(195, (waterTemp || 200) - 2));
+      const cat = drinkTypes.find((d) => d.id === drinkType)?.category;
+      if (cat === 'milk' && milk === 'none') {
+        setMilk('whole');
+        setMilkAmount('8oz');
+      }
+    } else if (goal === 'fix-bitter') {
+      setGrindSize(grindRelativeToDrinkDefault(drinkType, -2));
+      setWaterTemp(Math.max(195, Math.min(202, (waterTemp || 200) - 3)));
+      const cat = drinkTypes.find((d) => d.id === drinkType)?.category;
+      if ((cat === 'espresso' || cat === 'milk') && (waterTemp || 200) > 45 && (brewTime || 28) < 600) {
+        setBrewTime(Math.max(20, (brewTime || 28) - 4));
+      }
+    }
+    toast.message('Pre-filled for your goal — tweak anything', {
+      description: 'Adjust sliders or open Advanced for full control.',
+    });
+  };
+
+  const syncSimpleSlidersFromControls = useCallback(() => {
+    const cat = selectedDrinkType?.category;
+    if (cat === 'brewed') {
+      const lo = 180;
+      const hi = 360;
+      const pct = ((brewTime ?? 270) - lo) / (hi - lo);
+      setSimpleStrength(Math.round(Math.max(0, Math.min(100, pct * 100))));
+    } else if (['cold-brew', 'nitro-cold-brew'].includes(drinkType)) {
+      const lo = 57600;
+      const hi = 115200;
+      const pct = ((brewTime ?? 86400) - lo) / (hi - lo);
+      setSimpleStrength(Math.round(Math.max(0, Math.min(100, pct * 100))));
+    } else {
+      setSimpleStrength(Math.min(100, Math.round(((espressoShots ?? 0) / 10) * 100)));
+    }
+    const defId = defaultGrindByDrink[drinkType] ?? 'medium';
+    const di = grindSizes.findIndex((g) => g.id === defId);
+    const ci = grindSizes.findIndex((g) => g.id === grindSize);
+    if (di >= 0 && ci >= 0) {
+      setSimpleFlavor(Math.min(100, Math.max(0, 50 + (ci - di) * 16)));
+    }
+  }, [selectedDrinkType, drinkType, brewTime, espressoShots, grindSize]);
+
+  const onSimpleStrengthChange = (v: number) => {
+    setSimpleStrength(v);
+    const cat = selectedDrinkType?.category;
+    const pct = v / 100;
+    if (cat === 'brewed') {
+      setBrewTime(Math.round(180 + pct * 180));
+    } else if (['cold-brew', 'nitro-cold-brew'].includes(drinkType)) {
+      setBrewTime(Math.round(57600 + pct * (115200 - 57600)));
+    } else {
+      setEspressoShots(Math.round(pct * 10));
+    }
+  };
+
+  const onSimpleFlavorChange = (v: number) => {
+    setSimpleFlavor(v);
+    const defId = defaultGrindByDrink[drinkType] ?? 'medium';
+    let di = grindSizes.findIndex((g) => g.id === defId);
+    if (di < 0) di = 3;
+    const t = v / 100;
+    const offset = Math.round((t - 0.5) * 6);
+    const ni = Math.max(0, Math.min(grindSizes.length - 1, di + offset));
+    setGrindSize(grindSizes[ni].id);
+  };
+
+  useEffect(() => {
+    if (brewUiMode !== 'simple') return;
+    syncSimpleSlidersFromControls();
+  }, [brewUiMode, drinkType, syncSimpleSlidersFromControls]);
+
   const handleSave = () => {
     const recipe: CoffeeRecipe = {
       id: initialRecipe?.id || Date.now().toString(),
@@ -222,6 +343,28 @@ export function CoffeeBuilder({ initialRecipe }: CoffeeBuilderProps) {
     brewTime,
     waterTemp,
   };
+
+  useEffect(() => {
+    const snap = sensorySnapshot(previewRecipe);
+    if (prevSensoryRef.current) {
+      setSensoryChangeHints(sensoryDiffLabels(prevSensoryRef.current, snap));
+    }
+    prevSensoryRef.current = snap;
+  }, [
+    grindSize,
+    waterTemp,
+    brewTime,
+    espressoShots,
+    roast,
+    drinkType,
+    milk,
+    beanBlend,
+    useCustomBlend,
+    customBlend?.id,
+    sweetener,
+    flavorSyrup,
+    selectedToppings.join(','),
+  ]);
 
   // Function to generate flavor profile for a blend
   const generateBlendFlavorProfile = (blend: CustomBlend): string => {
@@ -333,11 +476,37 @@ export function CoffeeBuilder({ initialRecipe }: CoffeeBuilderProps) {
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
+        {/* Mobile: outcomes first (score + order); desktop: builder left */}
         {/* Left Column - Builder */}
-        <div className="space-y-6">
+        <div className="space-y-6 order-2 lg:order-1 min-w-0">
           <div className="bg-white rounded-lg border border-gray-200 p-6">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-6">Build Your Coffee</h2>
-            
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">Build Your Coffee</h2>
+            <p className="text-sm text-gray-500 mb-4">Start with a goal — we pre-fill the dials; you stay in control.</p>
+
+            <div className="rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50/80 p-4 mb-6">
+              <p className="text-xs font-bold text-amber-900 uppercase tracking-wide mb-2">Start with a goal</p>
+              <div className="flex flex-wrap gap-2">
+                {(
+                  [
+                    { id: 'better-latte' as const, label: 'Better Latte', emoji: '☕' },
+                    { id: 'stronger' as const, label: 'Stronger Coffee', emoji: '⚡' },
+                    { id: 'smoother' as const, label: 'Smoother Flavor', emoji: '🌸' },
+                    { id: 'fix-bitter' as const, label: 'Fix Bitter Coffee', emoji: '🔥' },
+                  ] as const
+                ).map((b) => (
+                  <button
+                    key={b.id}
+                    type="button"
+                    onClick={() => applyQuickStart(b.id)}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold bg-white border border-amber-300 text-coffee-800 shadow-sm hover:border-amber-500 hover:shadow transition-all"
+                  >
+                    <span>{b.emoji}</span>
+                    {b.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="space-y-6">
               {/* Recipe Name */}
               <div>
@@ -536,17 +705,37 @@ export function CoffeeBuilder({ initialRecipe }: CoffeeBuilderProps) {
                       </div>
                     )}
 
-                    {/* Create New Blend Button */}
-                    <button
-                      onClick={handleGoToBlendBuilder}
-                      className="w-full p-4 bg-coffee-100 border-2 border-coffee-300 border-dashed rounded-md text-coffee-800 hover:bg-coffee-200 hover:border-coffee-400 transition-colors flex items-center justify-center gap-2"
-                    >
-                      <Sparkles className="size-5" />
-                      <div className="text-left">
-                        <div className="font-medium">Create New Blend</div>
-                        <div className="text-xs">Mix from 110+ bean varieties</div>
+                    {/* Optional: custom blend lab (after you have a drink in mind) */}
+                    {!blendLabOpen ? (
+                      <button
+                        type="button"
+                        onClick={() => setBlendLabOpen(true)}
+                        className="w-full py-2.5 px-3 text-sm text-coffee-700 border border-dashed border-coffee-300 rounded-md hover:bg-coffee-50 transition-colors"
+                      >
+                        Optional — design a custom bean blend (110+ origins)
+                      </button>
+                    ) : (
+                      <div className="space-y-2">
+                        <button
+                          type="button"
+                          onClick={handleGoToBlendBuilder}
+                          className="w-full p-4 bg-coffee-100 border-2 border-coffee-300 border-dashed rounded-md text-coffee-800 hover:bg-coffee-200 hover:border-coffee-400 transition-colors flex items-center justify-center gap-2"
+                        >
+                          <Sparkles className="size-5" />
+                          <div className="text-left">
+                            <div className="font-medium">Open Bean Blend Builder</div>
+                            <div className="text-xs">Best after your drink is roughly set</div>
+                          </div>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setBlendLabOpen(false)}
+                          className="text-xs text-gray-500 hover:text-gray-700"
+                        >
+                          Hide blend tools
+                        </button>
                       </div>
-                    </button>
+                    )}
                   </div>
                 )}
               </div>
@@ -574,18 +763,89 @@ export function CoffeeBuilder({ initialRecipe }: CoffeeBuilderProps) {
 
               {/* Step 3.5: Brew Parameters */}
               <div className="border-l-4 border-amber-500 pl-4">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="bg-amber-600 text-white rounded-full size-7 flex items-center justify-center text-sm font-bold flex-shrink-0">
-                    ⚗
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-amber-600 text-white rounded-full size-7 flex items-center justify-center text-sm font-bold flex-shrink-0">
+                      ⚗
+                    </div>
+                    <label className="text-base font-bold text-amber-600 uppercase tracking-wide">
+                      Brew Parameters
+                    </label>
                   </div>
-                  <label className="text-base font-bold text-amber-600 uppercase tracking-wide">
-                    Brew Parameters
-                  </label>
+                  <div className="sm:ml-auto flex rounded-lg border border-amber-200 overflow-hidden text-xs font-semibold">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setBrewUiMode('simple');
+                        syncSimpleSlidersFromControls();
+                      }}
+                      className={`px-3 py-2 transition-colors ${brewUiMode === 'simple' ? 'bg-amber-600 text-white' : 'bg-white text-amber-900 hover:bg-amber-50'}`}
+                    >
+                      Simple
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setBrewUiMode('advanced')}
+                      className={`px-3 py-2 transition-colors ${brewUiMode === 'advanced' ? 'bg-amber-600 text-white' : 'bg-white text-amber-900 hover:bg-amber-50'}`}
+                    >
+                      Advanced
+                    </button>
+                  </div>
                 </div>
                 <p className="text-xs text-gray-500 italic mb-4">
-                  These variables affect flavor richness, bitterness, and caffeine extraction — adjust to dial in your perfect cup.
+                  These variables affect flavor richness, bitterness, and extraction — simple mode keeps it to two sliders.
                 </p>
 
+                {brewUiMode === 'simple' ? (
+                  <div className="space-y-5">
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-semibold text-gray-800">Strength</span>
+                        <span className="text-xs font-medium text-amber-800">
+                          {selectedDrinkType?.category === 'brewed'
+                            ? `~${Math.round((brewTime ?? 270) / 60)} min brew`
+                            : ['cold-brew', 'nitro-cold-brew'].includes(drinkType)
+                            ? `${Math.round((brewTime ?? 86400) / 3600)}h steep`
+                            : `${espressoShots} ${espressoShots === 1 ? 'shot' : 'shots'}`}
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min={0}
+                        max={100}
+                        value={simpleStrength}
+                        onChange={(e) => onSimpleStrengthChange(Number(e.target.value))}
+                        className="w-full"
+                      />
+                      <div className="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>Milder</span>
+                        <span>Bolder</span>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-semibold text-gray-800">Flavor</span>
+                        <span className="text-xs text-gray-500">Smooth ↔ Rich</span>
+                      </div>
+                      <input
+                        type="range"
+                        min={0}
+                        max={100}
+                        value={simpleFlavor}
+                        onChange={(e) => onSimpleFlavorChange(Number(e.target.value))}
+                        className="w-full"
+                      />
+                      <div className="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>Smoother / less bite</span>
+                        <span>More body & aroma</span>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2 italic">
+                        We move grind around your drink’s default — open Advanced for exact grind, temp, and time.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <>
                 {/* Grind Size */}
                 <div className="mb-4">
                   <div className="flex items-center gap-2 mb-2">
@@ -687,6 +947,8 @@ export function CoffeeBuilder({ initialRecipe }: CoffeeBuilderProps) {
                     Espresso: 20–35s ideal. Drip: 3–6 min. French press: 4 min. Cold brew: 12–24h.
                   </p>
                 </div>
+                  </>
+                )}
               </div>
 
               {/* Step 4: Espresso Shots */}
@@ -1196,11 +1458,22 @@ export function CoffeeBuilder({ initialRecipe }: CoffeeBuilderProps) {
           </div>
         </div>
 
-        {/* Right Column - Order Summary & Nutrition */}
-        <div className="lg:sticky lg:top-4 h-fit space-y-6">
+        {/* Right Column — score first, outcomes, then nutrition */}
+        <div className="order-1 lg:order-2 lg:sticky lg:top-4 h-fit space-y-4 sm:space-y-6">
+          <SCAScoreCard recipe={previewRecipe} changeHints={sensoryChangeHints} />
+          <div className="rounded-lg border border-amber-200 bg-amber-50/90 p-4">
+            <p className="text-xs font-bold text-amber-900 uppercase tracking-wide mb-2">Why this works</p>
+            <ul className="text-sm text-amber-950 space-y-2 list-disc pl-4">
+              <li>Finer grind increases extraction → stronger flavor, but more bitterness risk.</li>
+              <li>Higher brew temp increases solubility → fuller body; too hot can taste harsh.</li>
+              <li>
+                Your grind ({grindSizes.find((g) => g.id === grindSize)?.name ?? grindSize}) is tuned for{' '}
+                {selectedDrinkType?.name ?? 'this drink'} — adjust Simple Flavor or Advanced temp/time to chase sweetness vs. bite.
+              </li>
+            </ul>
+          </div>
           <OrderSummary recipe={previewRecipe} />
-          <SCAScoreCard recipe={previewRecipe} />
-          <NutritionPanel recipe={previewRecipe} />
+          <NutritionPanel recipe={previewRecipe} compact />
         </div>
       </div>
     </div>
