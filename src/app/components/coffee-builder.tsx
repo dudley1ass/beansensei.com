@@ -25,6 +25,7 @@ import { SCAScoreCard } from './sca-scorecard';
 import { generateRecipePDF } from '../utils/pdf-generator';
 import { calculateNutrition } from '../utils/nutrition-calculator';
 import { sensorySnapshot, sensoryDiffLabels } from '../utils/sensory-feedback';
+import { computeSCAScorecard } from '../utils/sca-scorer';
 import { toast } from 'sonner';
 
 interface CoffeeBuilderProps {
@@ -65,6 +66,9 @@ export function CoffeeBuilder({ initialRecipe }: CoffeeBuilderProps) {
   const [sensoryChangeHints, setSensoryChangeHints] = useState<string[]>([]);
   const prevSensoryRef = useRef<ReturnType<typeof sensorySnapshot> | null>(null);
   const [blendLabOpen, setBlendLabOpen] = useState(false);
+
+  const scoreCardRef = useRef<HTMLDivElement>(null);
+  const [scorePinnedToHeader, setScorePinnedToHeader] = useState(false);
 
   const selectedDrinkType = drinkTypes.find(d => d.id === drinkType);
 
@@ -284,6 +288,21 @@ export function CoffeeBuilder({ initialRecipe }: CoffeeBuilderProps) {
     syncSimpleSlidersFromControls();
   }, [brewUiMode, drinkType, syncSimpleSlidersFromControls]);
 
+  useEffect(() => {
+    const el = scoreCardRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        const scrolledPast =
+          !entry.isIntersecting && entry.boundingClientRect.top < 0;
+        setScorePinnedToHeader(scrolledPast);
+      },
+      { threshold: 0, root: null, rootMargin: '0px' }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   const handleSave = () => {
     const recipe: CoffeeRecipe = {
       id: initialRecipe?.id || Date.now().toString(),
@@ -396,10 +415,62 @@ export function CoffeeBuilder({ initialRecipe }: CoffeeBuilderProps) {
     return formattedNotes.join(', ');
   };
 
+  const dockedScorecard = computeSCAScorecard(previewRecipe);
+
   return (
     <div className="relative">
+      {/* Fixed score strip when main card has scrolled out above viewport */}
+      <div
+        className={`fixed left-0 right-0 z-[60] border-b-2 border-coffee-300 bg-white/95 backdrop-blur-md shadow-md transition-[transform,opacity] duration-200 ease-out motion-reduce:transition-none pt-[env(safe-area-inset-top,0px)] ${
+          scorePinnedToHeader
+            ? 'translate-y-0 opacity-100'
+            : '-translate-y-full opacity-0 pointer-events-none'
+        }`}
+        aria-hidden={!scorePinnedToHeader}
+      >
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2 sm:py-2.5 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-lg sm:text-xl shrink-0" aria-hidden>
+              {dockedScorecard.gradeEmoji}
+            </span>
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-coffee-700 uppercase tracking-wide truncate">
+                Live coffee score
+              </p>
+              <p className="text-sm sm:text-base font-black text-gray-900 tabular-nums leading-tight truncate">
+                <span className="text-amber-600">{dockedScorecard.totalScore}</span>
+                <span className="font-bold text-gray-600"> / 100</span>
+                <span className="font-semibold text-gray-700"> · {dockedScorecard.grade}</span>
+              </p>
+            </div>
+          </div>
+          {sensoryChangeHints.length > 0 ? (
+            <div className="flex flex-wrap gap-1.5 min-w-0 sm:justify-end">
+              {sensoryChangeHints.map((h) => (
+                <span
+                  key={h}
+                  className="text-[10px] sm:text-xs font-semibold text-violet-900 bg-violet-50 border border-violet-200 rounded-full px-2 py-0.5 max-w-[100%] truncate"
+                >
+                  {h}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="text-[11px] sm:text-xs text-gray-500 sm:text-right">
+              Tweak the builder — updates instantly
+            </p>
+          )}
+        </div>
+      </div>
+
       {/* Mobile Sticky Progress Bar */}
-      <div className="lg:hidden sticky top-0 z-20 bg-white border-b-2 border-coffee-300 shadow-md px-4 py-3 overflow-x-auto">
+      <div
+        className={`lg:hidden sticky z-20 bg-white border-b-2 border-coffee-300 shadow-md px-4 py-3 overflow-x-auto transition-[top] duration-200 ease-out motion-reduce:transition-none ${
+          scorePinnedToHeader
+            ? 'top-[calc(5.25rem+env(safe-area-inset-top,0px))]'
+            : 'top-0'
+        }`}
+      >
         <div className="flex items-center gap-2 min-w-max">
           <Coffee className="size-4 text-coffee-700 flex-shrink-0" />
           
@@ -1460,7 +1531,9 @@ export function CoffeeBuilder({ initialRecipe }: CoffeeBuilderProps) {
 
         {/* Right Column — score first, outcomes, then nutrition */}
         <div className="order-1 lg:order-2 lg:sticky lg:top-4 h-fit space-y-4 sm:space-y-6">
-          <SCAScoreCard recipe={previewRecipe} changeHints={sensoryChangeHints} />
+          <div ref={scoreCardRef} className="scroll-mt-4">
+            <SCAScoreCard recipe={previewRecipe} changeHints={sensoryChangeHints} />
+          </div>
           <div className="rounded-lg border border-amber-200 bg-amber-50/90 p-4">
             <p className="text-xs font-bold text-amber-900 uppercase tracking-wide mb-2">Why this works</p>
             <ul className="text-sm text-amber-950 space-y-2 list-disc pl-4">
